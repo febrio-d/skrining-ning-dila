@@ -20,6 +20,17 @@ export default function Template() {
       tanggal_lahir: z.string().min(1, "harus diisi"),
       agama: z.string({ required_error: "harus dipilih" }),
       hp: z.string().min(1, "harus diisi"),
+      td: z
+        .number({
+          required_error: "harus diisi",
+          invalid_type_error: "harus diisi",
+        })
+        .array()
+        .length(2),
+      gd: z.number({
+        required_error: "harus diisi",
+        invalid_type_error: "harus diisi",
+      }),
       bb: z.number({
         required_error: "harus diisi",
         invalid_type_error: "harus diisi",
@@ -281,12 +292,14 @@ export default function Template() {
           ))}
         </Tab.List>
       </Tab.Group>
-      <div className="grid grid-cols-7 gap-2 rounded-md border p-2 shadow">
+      <div
+        className={cn(
+          "grid sm:grid-cols-7 gap-2 rounded-md border p-2 shadow",
+          "grid-cols-3"
+        )}
+      >
         <div
-          className={cn(
-            "grid max-w-xs",
-            errors.pasien?.nik && "rounded-lg bg-red-100"
-          )}
+          className={cn("grid", errors.pasien?.nik && "rounded-lg bg-red-100")}
         >
           <div className="flex items-baseline justify-between">
             <label htmlFor="nik" className="text-sm font-medium text-gray-900">
@@ -305,10 +318,7 @@ export default function Template() {
           />
         </div>
         <div
-          className={cn(
-            "grid max-w-xs",
-            errors.pasien?.nama && "rounded-lg bg-red-100"
-          )}
+          className={cn("grid", errors.pasien?.nama && "rounded-lg bg-red-100")}
         >
           <div className="flex items-baseline justify-between">
             <label htmlFor="nama" className="text-sm font-medium text-gray-900">
@@ -328,7 +338,7 @@ export default function Template() {
         </div>
         <div
           className={cn(
-            "grid max-w-xs",
+            "grid",
             errors.pasien?.nama_kk && "rounded-lg bg-red-100"
           )}
         >
@@ -353,7 +363,7 @@ export default function Template() {
         </div>
         <div
           className={cn(
-            "grid max-w-xs",
+            "grid",
             errors.pasien?.jenis_kelamin && "rounded-lg bg-red-100"
           )}
         >
@@ -386,7 +396,7 @@ export default function Template() {
                   onChange={(val: any) => onChange(val.value)}
                   options={options}
                   value={options.find((c) => c.value === value)}
-                  placeholder="Pilih Jenis Kelamin"
+                  placeholder="Pilih..."
                 />
               );
             }}
@@ -394,7 +404,6 @@ export default function Template() {
         </div>
         <div
           className={cn(
-            "max-w-xs",
             errors.pasien?.tanggal_lahir && "rounded-lg bg-red-100"
           )}
         >
@@ -429,7 +438,7 @@ export default function Template() {
         </div>
         <div
           className={cn(
-            "grid max-w-xs"
+            "grid"
             // errors.pasien.hp && "rounded-lg bg-red-100"
           )}
         >
@@ -449,302 +458,391 @@ export default function Template() {
             {...register("pasien.hp")}
           />
         </div>
+        <div
+          className={cn(
+            "grid max-w-xs",
+            errors.pasien?.td && "rounded-lg bg-red-100"
+          )}
+        >
+          <div className="flex items-baseline justify-between">
+            <label htmlFor="td" className="text-sm font-medium text-gray-900">
+              TD
+            </label>
+            {errors.pasien?.td ? (
+              <p className="pr-0.5 text-xs text-red-500">
+                {errors.pasien.td.message}
+              </p>
+            ) : null}
+          </div>
+          <div className="flex items-center justify-center gap-1">
+            <div className="relative flex-1">
+              <Input
+                type="number"
+                className="py-1 pl-2 pr-7 text-xs"
+                placeholder="SYS"
+                {...register("pasien.td.0", {
+                  valueAsNumber: true,
+                })}
+                onWheel={(e) => e.currentTarget.blur()}
+                onInput={(e: React.FocusEvent<HTMLInputElement, Element>) => {
+                  +e.target.value < 0 && setValue("pasien.td.0", 0);
+                  +e.target.value > 250 && setValue("pasien.td.0", 250);
+                }}
+              />
+              <div className="absolute inset-y-0 items-center flex right-1.5 top-0 bottom-0 align-middle">
+                <p className="text-[8px]/[10px]">mmHg</p>
+              </div>
+            </div>
+            <span>/</span>
+            <div className="relative flex-1">
+              <Input
+                type="number"
+                className="py-1 pl-2 pr-7 text-xs"
+                placeholder="DIA"
+                {...register("pasien.td.1", {
+                  valueAsNumber: true,
+                })}
+                onWheel={(e) => e.currentTarget.blur()}
+                onInput={(e: React.FocusEvent<HTMLInputElement, Element>) => {
+                  +e.target.value < 0 && setValue("pasien.td.1", 0);
+                  +e.target.value > 180 && setValue("pasien.td.1", 180);
+                }}
+              />
+              <div className="absolute inset-y-0 items-center flex right-1.5 top-0 bottom-0 align-middle">
+                <p className="text-[8px]/[10px]">mmHg</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className={cn("grid", errors.pasien?.gd && "rounded-lg bg-red-100")}
+        >
+          <div className="flex items-baseline justify-between">
+            <label htmlFor="gd" className="text-sm font-medium text-gray-900">
+              Gula Darah
+            </label>
+            {errors.pasien?.gd ? (
+              <p className="pr-0.5 text-xs text-red-500">
+                {errors.pasien.gd.message}
+              </p>
+            ) : null}
+          </div>
+          <Input
+            className="px-2 py-1 text-xs"
+            id="gd"
+            {...register("pasien.gd")}
+          />
+        </div>
+        <div className="flex gap-2">
+          <div
+            className={cn("grid", errors.pasien?.bb && "rounded-lg bg-red-100")}
+          >
+            <div className="flex items-baseline justify-between">
+              <label htmlFor="bb" className="text-sm font-medium text-gray-900">
+                BB
+              </label>
+              {errors.pasien?.bb ? (
+                <p className="pr-0.5 text-xs text-red-500">
+                  {errors.pasien.bb.message}
+                </p>
+              ) : null}
+            </div>
+            <div className="relative">
+              <Input
+                type="number"
+                className="pl-2 pr-4 py-1 text-xs"
+                id="bb"
+                {...register("pasien.bb")}
+              />
+              <div className="absolute inset-y-0 items-center flex right-1.5 top-0 bottom-0 align-middle">
+                <p className="text-[8px]/[10px]">kg</p>
+              </div>
+            </div>
+          </div>
+          <div
+            className={cn("grid", errors.pasien?.tb && "rounded-lg bg-red-100")}
+          >
+            <div className="flex items-baseline justify-between">
+              <label htmlFor="tb" className="text-sm font-medium text-gray-900">
+                TB
+              </label>
+              {errors.pasien?.tb ? (
+                <p className="pr-0.5 text-xs text-red-500">
+                  {errors.pasien.tb.message}
+                </p>
+              ) : null}
+            </div>
+            <div className="relative">
+              <Input
+                type="number"
+                className="pl-2 pr-4 py-1 text-xs"
+                id="tb"
+                {...register("pasien.tb")}
+              />
+              <div className="absolute inset-y-0 items-center flex right-1.5 top-0 bottom-0 align-middle">
+                <p className="text-[8px]/[10px]">cm</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <div className={cn("grid gap-2 p-2", "rounded-md border shadow")}>
-          {skriningRiwKesehatan.map((val, idx) => (
-            <div
-              key={val.pertanyaan}
-              className={cn("flex flex-col gap-1 py-2 text-xs")}
-            >
-              <label
-                className="font-semibold "
-                // htmlFor={`${detailId}-${1}`}
-                // key={detailId}
+        <div className="border shadow">
+          <p className="select-none rounded-t bg-sky-700 py-1.5 text-center text-sm uppercase tracking-normal text-slate-50">
+            Riwayat Kesehatan
+          </p>
+          <div className={cn("grid gap-2 p-2")}>
+            {skriningRiwKesehatan.map((val, idx) => (
+              <div
+                key={val.pertanyaan}
+                className={cn("flex flex-col gap-1 py-2 text-xs")}
               >
-                {idx + 1}
-                {". "}
-                {val.pertanyaan}
-              </label>
-              <Controller
-                control={control}
-                name={`kesehatan.${idx}`}
-                render={({ field: { onChange, value, onBlur } }) => (
-                  <div
-                    className={cn(
-                      // "mb-2 flex flex-wrap items-center justify-start"
-                      "grid grid-flow-row auto-rows-fr items-start justify-start"
-                    )}
-                  >
-                    {val.jawaban?.map((jawaban, jwbId) => {
-                      const checked = true;
-                      const skor =
-                        idx === 7 ? (jwbId === 0 ? 0 : 1) : jwbId === 0 ? 1 : 0;
-                      return (
-                        <div className="group inline-flex" key={jwbId}>
-                          <input
-                            type="radio"
-                            className="peer"
-                            id={`kesehatan-${idx}-${jwbId + 1}`}
-                            checked={value === skor}
-                            onBlur={onBlur}
-                            onChange={() => onChange(skor)}
-                          />
-                          <label
-                            htmlFor={`kesehatan-${idx}-${jwbId + 1}`}
-                            className={cn(
-                              "relative cursor-pointer select-none",
-                              "bg-white px-2 py-1 text-gray-500",
-                              "peer-checked:border-sky-600 peer-checked:text-sky-700",
-                              //   "dark:border-gray-500 dark:bg-gray-700 -checked:dark:border-sky-600 peer-checked:",
-                              "peer-disabled:cursor-not-allowed peer-disabled:bg-gray-100 peer-disabled:hover:border-gray-300",
-                              // "peer-disabled:dark:bg-gray-700 peer-disabled:hover:dark:border-gray-500",
-                              "flex h-fit w-full justify-between gap-2 rounded-lg text-slate-700"
-                            )}
-                          >
-                            <span>{jawaban}</span>
-                            {/* <span>
-                                        {idx === 7
-                                          ? jwbId === 0
-                                            ? "(0)"
-                                            : "(1)"
-                                          : jwbId === 0
-                                          ? "(1)"
-                                          : "(0)"}
-                                      </span> */}
-                          </label>
-                        </div>
-                        // <LabelButton
-                        //   type="radio"
-                        //   className={cn(
-                        //     "flex h-fit w-full justify-between gap-2 rounded-lg text-slate-700"
-                        //     // (data.id === 2 ||
-                        //     //   detail.jawaban.length > 2) &&
-                        //     // // Kegiatan Ibadah
-                        //     // jawaban.id_instrumen === 38 && "rounded-lg"
-                        //   )}
-                        //   id={`kesehatan-${idx}-${jwbId + 1}`}
-                        //   key={jwbId}
-                        //   onBlur={onBlur}
-                        //   checked={value === skor}
-                        //   onChange={() => onChange(skor)}
-                        // >
-                        //   <span>{jawaban}</span>
-                        //   <span>
-                        //     {idx === 7
-                        //       ? jwbId === 0
-                        //         ? "(0)"
-                        //         : "(1)"
-                        //       : jwbId === 0
-                        //       ? "(1)"
-                        //       : "(0)"}
-                        //   </span>
-                        // </LabelButton>
-                      );
-                    })}
-                  </div>
-                )}
-              />
-            </div>
-          ))}
+                <label
+                  className="font-semibold"
+                  // htmlFor={`${detailId}-${1}`}
+                  // key={detailId}
+                >
+                  {idx + 1}
+                  {". "}
+                  {val.pertanyaan}
+                </label>
+                <Controller
+                  control={control}
+                  name={`kesehatan.${idx}`}
+                  render={({ field: { onChange, value, onBlur } }) => (
+                    <div
+                      className={cn(
+                        // "mb-2 flex flex-wrap items-center justify-start"
+                        "grid grid-flow-row auto-rows-fr items-start justify-start"
+                      )}
+                    >
+                      {val.jawaban?.map((jawaban, jwbId) => {
+                        const checked = true;
+                        const skor =
+                          idx === 7
+                            ? jwbId === 0
+                              ? 0
+                              : 1
+                            : jwbId === 0
+                            ? 1
+                            : 0;
+                        return (
+                          <div className="group inline-flex" key={jwbId}>
+                            <input
+                              type="radio"
+                              className="peer"
+                              id={`kesehatan-${idx}-${jwbId + 1}`}
+                              checked={value === skor}
+                              onBlur={onBlur}
+                              onChange={() => onChange(skor)}
+                            />
+                            <label
+                              htmlFor={`kesehatan-${idx}-${jwbId + 1}`}
+                              className={cn(
+                                "relative cursor-pointer select-none",
+                                "bg-white px-2 py-1 text-gray-500",
+                                "peer-checked:border-sky-600 peer-checked:text-sky-700",
+                                "peer-disabled:cursor-not-allowed peer-disabled:bg-gray-100 peer-disabled:hover:border-gray-300",
+                                "flex h-fit w-full justify-between items-center gap-2 rounded-lg text-slate-700"
+                              )}
+                            >
+                              <span>{jawaban}</span>
+                              {/* <span>
+                              {idx === 7
+                                ? jwbId === 0
+                                  ? "(0)"
+                                  : "(1)"
+                                : jwbId === 0
+                                ? "(1)"
+                                : "(0)"}
+                            </span> */}
+                            </label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                />
+              </div>
+            ))}
+          </div>
         </div>
-        <div
-          className={cn("flex flex-col gap-2 p-2", "rounded-md border shadow")}
-        >
-          {skriningRiwPenyakit.map((val, idx) => (
-            <div
-              key={val.pertanyaan}
-              className={cn("flex flex-col gap-1 py-2 text-xs")}
-            >
-              <p className="font-semibold ">
-                {idx + 1}
-                {". "}
-                {val.pertanyaan}
-              </p>
-              <Controller
-                control={control}
-                name={`penyakit.${idx}`}
-                render={({ field: { onChange, value, onBlur } }) => (
-                  <div
-                    className={cn(
-                      "grid grid-flow-row auto-rows-fr items-start justify-start"
-                    )}
-                  >
-                    {["Ya", "Tidak"]?.map((jawaban, jwbId) => {
-                      const skor = jwbId === 0 ? 1 : 0;
-                      return (
-                        <div className="group inline-flex" key={jwbId}>
-                          <input
-                            type="radio"
-                            className="peer"
-                            id={`penyakit-${idx}-${jwbId + 1}`}
-                            checked={value === skor}
-                            onBlur={onBlur}
-                            onChange={() => onChange(skor)}
-                          />
-                          <label
-                            htmlFor={`penyakit-${idx}-${jwbId + 1}`}
-                            className={cn(
-                              "relative cursor-pointer select-none",
-                              "bg-white px-2 py-1 text-gray-500",
-                              "peer-checked:border-sky-600 peer-checked:text-sky-700",
-                              //   "dark:border-gray-500 dark:bg-gray-700 -checked:dark:border-sky-600 peer-checked:",
-                              "peer-disabled:cursor-not-allowed peer-disabled:bg-gray-100 peer-disabled:hover:border-gray-300",
-                              // "peer-disabled:dark:bg-gray-700 peer-disabled:hover:dark:border-gray-500",
-                              "flex h-fit w-full justify-between gap-2 rounded-lg text-slate-700"
-                            )}
-                          >
-                            <span>{jawaban}</span>
-                            {/* <span>
-                                        {idx === 7
-                                          ? jwbId === 0
-                                            ? "(0)"
-                                            : "(1)"
-                                          : jwbId === 0
-                                          ? "(1)"
-                                          : "(0)"}
-                                      </span> */}
-                          </label>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              />
-            </div>
-          ))}
+        <div className="border shadow">
+          <p className="select-none rounded-t bg-sky-700 py-1.5 text-center text-sm uppercase tracking-normal text-slate-50">
+            Riwayat Penyakit Pribadi
+          </p>
+          <div className={cn("flex flex-col gap-2 p-2")}>
+            {skriningRiwPenyakit.map((val, idx) => (
+              <div
+                key={val.pertanyaan}
+                className={cn("flex flex-col gap-1 py-2 text-xs")}
+              >
+                <p className="font-semibold">
+                  {idx + 1}
+                  {". "}
+                  {val.pertanyaan}
+                </p>
+                <Controller
+                  control={control}
+                  name={`penyakit.${idx}`}
+                  render={({ field: { onChange, value, onBlur } }) => (
+                    <div
+                      className={cn(
+                        "grid grid-flow-row auto-rows-fr items-start justify-start"
+                      )}
+                    >
+                      {["Ya", "Tidak"]?.map((jawaban, jwbId) => {
+                        const skor = jwbId === 0 ? 1 : 0;
+                        return (
+                          <div className="group inline-flex" key={jwbId}>
+                            <input
+                              type="radio"
+                              className="peer"
+                              id={`penyakit-${idx}-${jwbId + 1}`}
+                              checked={value === skor}
+                              onBlur={onBlur}
+                              onChange={() => onChange(skor)}
+                            />
+                            <label
+                              htmlFor={`penyakit-${idx}-${jwbId + 1}`}
+                              className={cn(
+                                "relative cursor-pointer select-none",
+                                "bg-white px-2 py-1 text-gray-500",
+                                "peer-checked:border-sky-600 peer-checked:text-sky-700",
+                                "peer-disabled:cursor-not-allowed peer-disabled:bg-gray-100 peer-disabled:hover:border-gray-300",
+                                "flex h-fit w-full justify-between items-center gap-2 rounded-lg text-slate-700"
+                              )}
+                            >
+                              <span>{jawaban}</span>
+                              {/* <span>{jwbId === 0 ? "(1)" : "(0)"}</span> */}
+                            </label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                />
+              </div>
+            ))}
+          </div>
         </div>
-        <div
-          className={cn("flex flex-col gap-2 p-2", "rounded-md border shadow")}
-        >
-          {skriningRiwKeluarga.map((val, idx) => (
-            <div
-              key={val.pertanyaan}
-              className={cn("flex flex-col gap-1 py-2 text-xs")}
-            >
-              <p className="font-semibold ">
-                {idx + 1}
-                {". "}
-                {val.pertanyaan}
-              </p>
-              <Controller
-                control={control}
-                name={`penyakit_keluarga.${idx}`}
-                render={({ field: { onChange, value, onBlur } }) => (
-                  <div
-                    className={cn(
-                      "grid grid-flow-row auto-rows-fr items-start justify-start"
-                    )}
-                  >
-                    {["Ya", "Tidak"]?.map((jawaban, jwbId) => {
-                      const skor = jwbId === 0 ? 1 : 0;
-                      return (
-                        <div className="group inline-flex" key={jwbId}>
-                          <input
-                            type="radio"
-                            className="peer"
-                            id={`penyakit_keluarga-${idx}-${jwbId + 1}`}
-                            checked={value === skor}
-                            onBlur={onBlur}
-                            onChange={() => onChange(skor)}
-                          />
-                          <label
-                            htmlFor={`penyakit_keluarga-${idx}-${jwbId + 1}`}
-                            className={cn(
-                              "relative cursor-pointer select-none",
-                              "bg-white px-2 py-1 text-gray-500",
-                              "peer-checked:border-sky-600 peer-checked:text-sky-700",
-                              //   "dark:border-gray-500 dark:bg-gray-700 -checked:dark:border-sky-600 peer-checked:",
-                              "peer-disabled:cursor-not-allowed peer-disabled:bg-gray-100 peer-disabled:hover:border-gray-300",
-                              // "peer-disabled:dark:bg-gray-700 peer-disabled:hover:dark:border-gray-500",
-                              "flex h-fit w-full justify-between gap-2 rounded-lg text-slate-700"
-                            )}
-                          >
-                            <span>{jawaban}</span>
-                            {/* <span>
-                                        {idx === 7
-                                          ? jwbId === 0
-                                            ? "(0)"
-                                            : "(1)"
-                                          : jwbId === 0
-                                          ? "(1)"
-                                          : "(0)"}
-                                      </span> */}
-                          </label>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              />
-            </div>
-          ))}
+        <div className="border shadow">
+          <p className="select-none rounded-t bg-sky-700 py-1.5 text-center text-sm uppercase tracking-normal text-slate-50">
+            Riwayat Penyakit Keluarga
+          </p>
+          <div className={cn("flex flex-col gap-2 p-2")}>
+            {skriningRiwKeluarga.map((val, idx) => (
+              <div
+                key={val.pertanyaan}
+                className={cn("flex flex-col gap-1 py-2 text-xs")}
+              >
+                <p className="font-semibold">
+                  {idx + 1}
+                  {". "}
+                  {val.pertanyaan}
+                </p>
+                <Controller
+                  control={control}
+                  name={`penyakit_keluarga.${idx}`}
+                  render={({ field: { onChange, value, onBlur } }) => (
+                    <div
+                      className={cn(
+                        "grid grid-flow-row auto-rows-fr items-start justify-start"
+                      )}
+                    >
+                      {["Ya", "Tidak"]?.map((jawaban, jwbId) => {
+                        const skor = jwbId === 0 ? 1 : 0;
+                        return (
+                          <div className="group inline-flex" key={jwbId}>
+                            <input
+                              type="radio"
+                              className="peer"
+                              id={`penyakit_keluarga-${idx}-${jwbId + 1}`}
+                              checked={value === skor}
+                              onBlur={onBlur}
+                              onChange={() => onChange(skor)}
+                            />
+                            <label
+                              htmlFor={`penyakit_keluarga-${idx}-${jwbId + 1}`}
+                              className={cn(
+                                "relative cursor-pointer select-none",
+                                "bg-white px-2 py-1 text-gray-500",
+                                "peer-checked:border-sky-600 peer-checked:text-sky-700",
+                                "peer-disabled:cursor-not-allowed peer-disabled:bg-gray-100 peer-disabled:hover:border-gray-300",
+                                "flex h-fit w-full justify-between items-center gap-2 rounded-lg text-slate-700"
+                              )}
+                            >
+                              <span>{jawaban}</span>
+                              {/* <span>{jwbId === 0 ? "(1)" : "(0)"}</span> */}
+                            </label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                />
+              </div>
+            ))}
+          </div>
         </div>
-        <div
-          className={cn("flex flex-col gap-2 p-2", "rounded-md border shadow")}
-        >
-          {skriningPolaMakan.map((val, idx) => (
-            <div
-              key={val.pertanyaan}
-              className={cn("flex flex-col gap-1 py-2 text-xs")}
-            >
-              <p className="font-semibold ">
-                {idx + 1}
-                {". "}
-                {val.pertanyaan}
-              </p>
-              <Controller
-                control={control}
-                name={`pola_makan.${idx}`}
-                render={({ field: { onChange, value, onBlur } }) => (
-                  <div
-                    className={cn(
-                      "grid grid-flow-row auto-rows-fr items-start justify-start"
-                    )}
-                  >
-                    {["Ya", "Tidak"]?.map((jawaban, jwbId) => {
-                      const skor = jwbId === 0 ? 1 : 0;
-                      return (
-                        <div className="group inline-flex" key={jwbId}>
-                          <input
-                            type="radio"
-                            className="peer"
-                            id={`pola_makan-${idx}-${jwbId + 1}`}
-                            checked={value === skor}
-                            onBlur={onBlur}
-                            onChange={() => onChange(skor)}
-                          />
-                          <label
-                            htmlFor={`pola_makan-${idx}-${jwbId + 1}`}
-                            className={cn(
-                              "relative cursor-pointer select-none",
-                              "bg-white px-2 py-1 text-gray-500",
-                              "peer-checked:border-sky-600 peer-checked:text-sky-700",
-                              //   "dark:border-gray-500 dark:bg-gray-700 -checked:dark:border-sky-600 peer-checked:",
-                              "peer-disabled:cursor-not-allowed peer-disabled:bg-gray-100 peer-disabled:hover:border-gray-300",
-                              // "peer-disabled:dark:bg-gray-700 peer-disabled:hover:dark:border-gray-500",
-                              "flex h-fit w-full justify-between gap-2 rounded-lg text-slate-700"
-                            )}
-                          >
-                            <span>{jawaban}</span>
-                            {/* <span>
-                                        {idx === 7
-                                          ? jwbId === 0
-                                            ? "(0)"
-                                            : "(1)"
-                                          : jwbId === 0
-                                          ? "(1)"
-                                          : "(0)"}
-                                      </span> */}
-                          </label>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              />
-            </div>
-          ))}
+        <div className="border shadow">
+          <p className="select-none rounded-t bg-sky-700 py-1.5 text-center text-sm uppercase tracking-normal text-slate-50">
+            Pola Konsumsi Makan
+          </p>
+          <div className={cn("flex flex-col gap-2 p-2")}>
+            {skriningPolaMakan.map((val, idx) => (
+              <div
+                key={val.pertanyaan}
+                className={cn("flex flex-col gap-1 py-2 text-xs")}
+              >
+                <p className="font-semibold">
+                  {idx + 1}
+                  {". "}
+                  {val.pertanyaan}
+                </p>
+                <Controller
+                  control={control}
+                  name={`pola_makan.${idx}`}
+                  render={({ field: { onChange, value, onBlur } }) => (
+                    <div
+                      className={cn(
+                        "grid grid-flow-row auto-rows-fr items-start justify-start"
+                      )}
+                    >
+                      {["Ya", "Tidak"]?.map((jawaban, jwbId) => {
+                        const skor = jwbId === 0 ? 1 : 0;
+                        return (
+                          <div className="group inline-flex" key={jwbId}>
+                            <input
+                              type="radio"
+                              className="peer"
+                              id={`pola_makan-${idx}-${jwbId + 1}`}
+                              checked={value === skor}
+                              onBlur={onBlur}
+                              onChange={() => onChange(skor)}
+                            />
+                            <label
+                              htmlFor={`pola_makan-${idx}-${jwbId + 1}`}
+                              className={cn(
+                                "relative cursor-pointer select-none",
+                                "bg-white px-2 py-1 text-gray-500",
+                                "peer-checked:border-sky-600 peer-checked:text-sky-700",
+                                "peer-disabled:cursor-not-allowed peer-disabled:bg-gray-100 peer-disabled:hover:border-gray-300",
+                                "flex h-fit w-full justify-between items-center gap-2 rounded-lg text-slate-700"
+                              )}
+                            >
+                              <span>{jawaban}</span>
+                              {/* <span>{jwbId === 0 ? "(1)" : "(0)"}</span> */}
+                            </label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
       <div
@@ -754,155 +852,90 @@ export default function Template() {
       >
         <table className="min-w-full text-sm">
           <thead>
-            <tr className="sticky top-0 z-20 bg-slate-100 *:border-r *:border-r-slate-50 *:px-4 *:py-2 *:text-center xl:-top-[1px]">
+            <tr className="sticky top-0 font-semibold z-20 bg-slate-100 *:border-r *:border-r-slate-50 *:px-4 *:py-2 *:text-center xl:-top-[1px]">
               <td rowSpan={2}>Skrining Riwayat Kesehatan</td>
               <td colSpan={6} className="!border-r-0">
-                Jenis Penyakit
+                Jenis Resiko Penyakit
               </td>
             </tr>
             <tr
               className={cn(
                 //   "sticky top-[37px]",
-                "z-20 border-y border-t-slate-50 bg-slate-100",
+                "z-20 border-y font-semibold border-t-slate-50 bg-slate-100",
                 "*:border-slate-50 *:px-2 *:py-0.5 *:text-center"
               )}
             >
-              <td className="border-x">DM</td>
-              <td className="border-r">HT</td>
-              <td className="border-r">S</td>
-              <td className="border-r">J</td>
-              <td className="border-r">G</td>
-              <td>OA</td>
+              <td className="border-x">Diabetes Mellitus</td>
+              <td className="border-r">Hipertensi</td>
+              <td className="border-r">Stroke</td>
+              <td className="border-r">Penyakit Jantung</td>
+              <td className="border-r">Gagal Ginjal</td>
+              <td>Osteoartritis</td>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 overflow-y-auto">
-            <tr className={cn("bg-white hover:text-sky-600", "align-top")}>
+            <tr className={cn("bg-white hover:text-sky-600 align-top")}>
               <td
                 className={cn(
-                  "whitespace-pre-wrap px-2 py-1.5",
-                  "border-b border-gray-200",
-                  "align-middle"
+                  "whitespace-pre-wrap align-middle px-2 py-1.5",
+                  "border-b border-gray-200"
                 )}
               >
-                <p>Riwayat kesehatan</p>
+                <p>Riwayat Kesehatan</p>
               </td>
             </tr>
-            <tr className={cn("bg-white hover:text-sky-600", "align-top")}>
+            <tr className={cn("bg-white hover:text-sky-600 align-top")}>
               <td
                 className={cn(
-                  "whitespace-pre-wrap px-2 py-1.5",
-                  "border-b border-gray-200",
-                  "align-middle"
+                  "whitespace-pre-wrap align-middle px-2 py-1.5",
+                  "border-b border-gray-200"
                 )}
               >
-                <p>Riwayat penyakit pribadi</p>
+                <p>Riwayat Penyakit Pribadi</p>
               </td>
             </tr>
-            <tr className={cn("bg-white hover:text-sky-600", "align-top")}>
+            <tr className={cn("bg-white hover:text-sky-600 align-top")}>
               <td
                 className={cn(
-                  "whitespace-pre-wrap px-2 py-1.5",
-                  "border-b border-gray-200",
-                  "align-middle"
+                  "whitespace-pre-wrap align-middle px-2 py-1.5",
+                  "border-b border-gray-200"
                 )}
               >
-                <p>Riwayat penyakit keluarga</p>
+                <p>Riwayat Penyakit Keluarga</p>
               </td>
             </tr>
-            <tr className={cn("bg-white hover:text-sky-600", "align-top")}>
+            <tr className={cn("bg-white hover:text-sky-600 align-top")}>
               <td
                 className={cn(
-                  "whitespace-pre-wrap px-2 py-1.5",
-                  "border-b border-gray-200",
-                  "align-middle"
+                  "whitespace-pre-wrap align-middle px-2 py-1.5",
+                  "border-b border-gray-200"
                 )}
               >
-                <p>Pola konsumsi makan</p>
+                <p>Pola Konsumsi Makan</p>
               </td>
             </tr>
-            <tr className={cn("bg-white hover:text-sky-600", "align-top")}>
+            <tr className={cn("bg-white hover:text-sky-600 align-top")}>
               <td
                 className={cn(
-                  "whitespace-pre-wrap px-2 py-1.5",
+                  "whitespace-pre-wrap align-middle px-2 py-1.5",
                   "border-b border-gray-200",
-                  "align-middle"
+                  "font-semibold"
                 )}
               >
                 <p>Jumlah</p>
               </td>
             </tr>
-            {/* {watch("")?.map((diag, idx) => (
-                        <>
-                          <tr
-                            className={cn(
-                              "bg-white hover:text-sky-600",
-                              "align-top"
-                            )}
-                            key={idx}
-                          >
-                            <td
-                              className={cn(
-                                "whitespace-pre-wrap px-2 py-1.5",
-                                "border-b border-gray-200",
-                                "align-middle"
-                              )}
-                              rowSpan={(diag?.detail?.length ?? 0) + 1}
-                            >
-                              <p className="mx-auto w-28 rounded-sm bg-slate-800 py-2 text-center text-xs font-medium tracking-wider text-slate-100">
-                                {diag.id_kunjungan}
-                              </p>
-                            </td>
-                            <td
-                              className={cn(
-                                "whitespace-pre-wrap px-2 py-1.5",
-                                "border-b border-gray-200",
-                                "text-center align-middle"
-                              )}
-                              rowSpan={(diag?.detail?.length ?? 0) + 1}
-                            >
-                              <p>
-                                {new Intl.DateTimeFormat("id-ID", {
-                                  dateStyle: "long",
-                                }).format(new Date(diag.tanggal))}
-                              </p>
-                            </td>
-                            <td
-                              className={cn(
-                                "whitespace-pre-wrap px-2 py-1.5",
-                                "border-b border-gray-200",
-                                "text-center align-middle"
-                              )}
-                              rowSpan={(diag?.detail?.length ?? 0) + 1}
-                            >
-                              <p className="text-teal-700 ">
-                                {diag.dokter}
-                              </p>
-                              <p className="font-light">{diag.klinik}</p>
-                            </td>
-                          </tr>
-                          {diag.detail.map((detail, detIdx) => (
-                            <tr
-                              className="bg-white text-xs *:align-top hover:text-sky-600"
-                              key={detIdx}
-                            >
-                              <td className="whitespace-pre-wrap border-b border-gray-200 px-0.5 py-2 text-center">
-                                {detIdx + 1 + "."}
-                              </td>
-                              <td className="whitespace-pre-wrap border-b border-gray-200 px-2 py-1.5">
-                                {detail.diagnosis}
-                              </td>
-                              <td className="whitespace-pre-wrap border-b border-gray-200 px-2 py-1.5">
-                                {detail.icd10}
-                              </td>
-                              <td className="whitespace-pre-wrap border-b border-gray-200 px-2 py-1.5">
-                                {detail.primer ? (
-                                  <RiCheckLine size="1rem" />
-                                ) : null}
-                              </td>
-                            </tr>
-                          ))}
-                        </>
-                      ))} */}
+            <tr className={cn("bg-white hover:text-sky-600 align-top")}>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5",
+                  "border-b border-gray-200",
+                  "font-semibold"
+                )}
+              >
+                <p>Total tambahan skor</p>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
