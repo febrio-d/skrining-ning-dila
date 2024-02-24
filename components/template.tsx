@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Dialog, Tab, Transition } from "@headlessui/react";
-import { cn, getAgeAll } from "@/lib/utils";
+import { Input } from "@/components/form";
 import { SelectInput } from "@/components/select";
-import { Controller, useForm } from "react-hook-form";
-import { Input, LabelButton } from "@/components/form";
-import { z } from "zod";
+import { cn, getAgeAll } from "@/lib/utils";
+import { Tab } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import React, { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 
 export default function Template() {
   const Schema = z.object({
@@ -31,11 +31,11 @@ export default function Template() {
         required_error: "harus diisi",
         invalid_type_error: "harus diisi",
       }),
-      bb: z.number({
+      tb: z.number({
         required_error: "harus diisi",
         invalid_type_error: "harus diisi",
       }),
-      tb: z.number({
+      bb: z.number({
         required_error: "harus diisi",
         invalid_type_error: "harus diisi",
       }),
@@ -424,7 +424,7 @@ export default function Template() {
             {...register("pasien.tanggal_lahir")}
           />
         </div>
-        <div className={cn("flex max-w-xs flex-col")}>
+        <div className={cn("flex flex-col")}>
           <div className="flex items-baseline justify-between">
             <label htmlFor="tgl" className="text-sm font-medium text-gray-900">
               Umur
@@ -535,31 +535,6 @@ export default function Template() {
         </div>
         <div className="flex gap-2">
           <div
-            className={cn("grid", errors.pasien?.bb && "rounded-lg bg-red-100")}
-          >
-            <div className="flex items-baseline justify-between">
-              <label htmlFor="bb" className="text-sm font-medium text-gray-900">
-                BB
-              </label>
-              {errors.pasien?.bb ? (
-                <p className="pr-0.5 text-xs text-red-500">
-                  {errors.pasien.bb.message}
-                </p>
-              ) : null}
-            </div>
-            <div className="relative">
-              <Input
-                type="number"
-                className="pl-2 pr-4 py-1 text-xs"
-                id="bb"
-                {...register("pasien.bb")}
-              />
-              <div className="absolute inset-y-0 items-center flex right-1.5 top-0 bottom-0 align-middle">
-                <p className="text-[8px]/[10px]">kg</p>
-              </div>
-            </div>
-          </div>
-          <div
             className={cn("grid", errors.pasien?.tb && "rounded-lg bg-red-100")}
           >
             <div className="flex items-baseline justify-between">
@@ -584,6 +559,47 @@ export default function Template() {
               </div>
             </div>
           </div>
+          <div
+            className={cn("grid", errors.pasien?.bb && "rounded-lg bg-red-100")}
+          >
+            <div className="flex items-baseline justify-between">
+              <label htmlFor="bb" className="text-sm font-medium text-gray-900">
+                BB
+              </label>
+              {errors.pasien?.bb ? (
+                <p className="pr-0.5 text-xs text-red-500">
+                  {errors.pasien.bb.message}
+                </p>
+              ) : null}
+            </div>
+            <div className="relative">
+              <Input
+                type="number"
+                className="pl-2 pr-4 py-1 text-xs"
+                id="bb"
+                {...register("pasien.bb")}
+              />
+              <div className="absolute inset-y-0 items-center flex right-1.5 top-0 bottom-0 align-middle">
+                <p className="text-[8px]/[10px]">kg</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col">
+          <div className="flex items-baseline justify-between">
+            <label htmlFor="imt" className="text-sm font-medium text-gray-900">
+              IMT
+            </label>
+          </div>
+          <p className="my-auto text-xs">
+            {watch("pasien.tb")?.toString().length > 2 &&
+            watch("pasien.bb")?.toString().length > 1
+              ? (
+                  watch("pasien.bb") /
+                  (((watch("pasien.tb") / 100) * watch("pasien.tb")) / 100)
+                ).toFixed(1)
+              : ""}
+          </p>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2">
