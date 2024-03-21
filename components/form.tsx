@@ -12,7 +12,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ref={ref}
         spellCheck={"false"}
         className={cn(
-          "w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 shadow-md placeholder:text-gray-500 hover:border-gray-400 focus:border-cyan-500 focus:outline-none focus:ring-cyan-500",
+          "w-full rounded-lg border border-gray-300 bg-gray-50 px-2 py-1.5 text-sm text-gray-900 shadow-md placeholder:text-gray-500 hover:border-gray-400 focus:border-cyan-500 focus:outline-none focus:ring-cyan-500",
           "transition-all duration-150 ease-linear",
           // "dark:border-gray-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:hover:border-gray-300 dark:focus:border-blue-500 dark:focus:ring-blue-500",
           "disabled:cursor-not-allowed disabled:bg-gray-100 disabled:hover:border-gray-300 disabled:dark:bg-gray-700 disabled:hover:dark:border-gray-500",
@@ -35,7 +35,7 @@ export const InputArea = React.forwardRef<HTMLTextAreaElement, InputAreaProps>(
         ref={ref}
         spellCheck={"false"}
         className={cn(
-          "w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 shadow-md placeholder:text-gray-500 hover:border-gray-400 focus:border-cyan-500 focus:outline-none focus:ring-cyan-500",
+          "w-full rounded-lg border border-gray-300 bg-gray-50 px-2 py-1.5 text-sm text-gray-900 shadow-md placeholder:text-gray-500 hover:border-gray-400 focus:border-cyan-500 focus:outline-none focus:ring-cyan-500",
           "transition-all duration-150 ease-linear",
           // "dark:border-gray-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:hover:border-gray-300 dark:focus:border-blue-500 dark:focus:ring-blue-500",
           "disabled:cursor-not-allowed disabled:bg-gray-100 disabled:hover:border-gray-300 disabled:dark:bg-gray-700 disabled:hover:dark:border-gray-500",
