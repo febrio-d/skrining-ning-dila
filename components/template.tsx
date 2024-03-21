@@ -3,11 +3,12 @@
 import { Input } from "@/components/form";
 import { SelectInput } from "@/components/select";
 import { cn, getAgeAll } from "@/lib/utils";
-import { Tab } from "@headlessui/react";
+import { Menu, Tab, Transition } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
+import { RiArrowDropDownLine } from "react-icons/ri";
 
 export default function Template() {
   const Schema = z.object({
@@ -61,12 +62,12 @@ export default function Template() {
     resolver: zodResolver(Schema),
   });
 
-  useEffect(() => {
-    const subscription = watch((value, { name, type }) =>
-      console.log(value, name, type)
-    );
-    return () => subscription.unsubscribe();
-  }, [watch]);
+  // useEffect(() => {
+  //   const subscription = watch((value, { name, type }) =>
+  //     console.log(value, name, type)
+  //   );
+  //   return () => subscription.unsubscribe();
+  // }, [watch]);
 
   const desa = [
     "Bogotanjung",
@@ -82,6 +83,16 @@ export default function Template() {
     "Gebang",
   ];
   const [desaIdx, setDesaIdx] = useState<number>(0);
+
+  const penyakit = [
+    { label: "Diabetes Mellitus", onClick: () => false },
+    { label: "Hipertensi", onClick: () => false },
+    { label: "Stroke", onClick: () => false },
+    { label: "Penyakit Jantung", onClick: () => false },
+    { label: "Gagal Ginjal", onClick: () => false },
+    { label: "Osteoartritis", onClick: () => false },
+  ];
+  const [penyakitIdx, setPenyakitIdx] = useState<number>(0);
 
   type KatPenyakit = "DM" | "HT" | "S" | "J" | "G" | "OA";
   const [skriningRiwKesehatan] = useState<
@@ -214,6 +225,20 @@ export default function Template() {
     { pertanyaan: "Pengapuran pada sendi lutut", kategori: ["OA"] },
   ]);
 
+  useEffect(() => {
+    const subscription = watch((value, { name, type }) => {
+      if (name?.includes("penyakit")) {
+        console.log("oke");
+        console.log(
+          skriningRiwPenyakit
+            .filter((skrin) => skrin.kategori?.includes("DM"))
+            .map((_, skrinIdx) => skrinIdx)
+        );
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
+
   const [skriningRiwKeluarga] = useState<
     { pertanyaan: string; kategori?: KatPenyakit[] }[]
   >([
@@ -273,25 +298,74 @@ export default function Template() {
 
   return (
     <div className="flex w-full transform flex-col gap-3 overflow-hidden bg-white p-6 text-left align-middle shadow-xl transition-all">
-      <Tab.Group
-        selectedIndex={desaIdx}
-        onChange={(index) => {
-          setDesaIdx(index);
-        }}
-      >
-        <Tab.List className="flex space-x-0.5 rounded-md bg-gray-900/20 p-0.5">
-          {desa.map((d) => (
-            <Tab
+      <div className="flex gap-1">
+        <Tab.Group
+          selectedIndex={desaIdx}
+          onChange={(index) => {
+            console.log(index);
+
+            setDesaIdx(index);
+          }}
+        >
+          <Tab.List className="flex flex-1 space-x-0.5 rounded-md bg-gray-900/20 p-0.5">
+            {desa.map((d) => (
+              <Tab
+                className={cn(
+                  "w-full rounded py-1.5 text-sm leading-5 text-gray-700 focus:outline-none ui-selected:bg-white ui-selected:shadow ui-not-selected:hover:bg-white/[0.12] ui-selected"
+                )}
+                key={d}
+              >
+                {d}
+              </Tab>
+            ))}
+          </Tab.List>
+        </Tab.Group>
+        <Menu as={React.Fragment}>
+          <div className="relative">
+            <Menu.Button
               className={cn(
-                "w-full rounded py-1.5 text-sm leading-5 text-gray-700 focus:outline-none ui-selected:bg-white ui-selected:shadow ui-not-selected:hover:bg-white/[0.12]  ui-selected"
+                "inline-flex p-2.5 text-center text-sm focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50",
+                "rounded-md bg-gray-900/20 font-semibold text-gray-700 active:bg-slate-300",
+                "px-4 py-[8px]"
               )}
-              key={d}
             >
-              {d}
-            </Tab>
-          ))}
-        </Tab.List>
-      </Tab.Group>
+              <RiArrowDropDownLine className="h-5 w-5" />
+            </Menu.Button>
+            <Transition
+              as={React.Fragment}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <Menu.Items className="absolute right-0 z-30 mt-1 w-60 rounded-md bg-gray-200 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                {penyakit.map((val) => (
+                  <div className="p-0.5" key={val.label}>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <button
+                          className={cn(
+                            // "group flex w-full items-center rounded-md px-2 py-2 text-sm",
+                            "relative flex w-full items-center rounded-md p-2 text-sm",
+                            active
+                              ? "bg-slate-200 text-sky-600"
+                              : "text-gray-900"
+                          )}
+                          onClick={val.onClick}
+                        >
+                          {val.label}
+                        </button>
+                      )}
+                    </Menu.Item>
+                  </div>
+                ))}
+              </Menu.Items>
+            </Transition>
+          </div>
+        </Menu>
+      </div>
       <div
         className={cn(
           "grid sm:grid-cols-7 gap-2 rounded-md border p-2 shadow",
@@ -601,6 +675,47 @@ export default function Template() {
               : ""}
           </p>
         </div>
+        <div className="flex flex-col">
+          <div className="flex items-baseline justify-between">
+            <label htmlFor="imt" className="text-sm font-medium text-gray-900">
+              Tes
+            </label>
+          </div>
+          <p className="my-auto text-xs">
+            {watch("kesehatan")
+              ?.filter((_, i) =>
+                skriningRiwKesehatan
+                  .filter((skrin) => skrin.kategori?.includes("DM"))
+                  .map((_, skrinIdx) => skrinIdx)
+                  .includes(i)
+              )
+              ?.reduce((acc, val) => acc + val, 0) +
+              watch("penyakit")
+                ?.filter((_, i) =>
+                  skriningRiwPenyakit
+                    .filter((skrin) => skrin.kategori?.includes("DM"))
+                    .map((_, skrinIdx) => skrinIdx)
+                    .includes(i)
+                )
+                ?.reduce((acc, val) => acc + val, 0) +
+              watch("penyakit_keluarga")
+                ?.filter((_, i) =>
+                  skriningRiwKeluarga
+                    .filter((skrin) => skrin.kategori?.includes("DM"))
+                    .map((_, skrinIdx) => skrinIdx)
+                    .includes(i)
+                )
+                ?.reduce((acc, val) => acc + val, 0) +
+              watch("pola_makan")
+                ?.filter((_, i) =>
+                  skriningPolaMakan
+                    .filter((skrin) => skrin.kategori?.includes("DM"))
+                    .map((_, skrinIdx) => skrinIdx)
+                    .includes(i)
+                )
+                ?.reduce((acc, val) => acc + val, 0)}
+          </p>
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-2">
         <div className="border shadow">
@@ -893,8 +1008,7 @@ export default function Template() {
             <tr className={cn("bg-white hover:text-sky-600 align-top")}>
               <td
                 className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5",
-                  "border-b border-gray-200"
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200"
                 )}
               >
                 <p>Riwayat Kesehatan</p>
@@ -903,8 +1017,7 @@ export default function Template() {
             <tr className={cn("bg-white hover:text-sky-600 align-top")}>
               <td
                 className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5",
-                  "border-b border-gray-200"
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200"
                 )}
               >
                 <p>Riwayat Penyakit Pribadi</p>
@@ -913,8 +1026,7 @@ export default function Template() {
             <tr className={cn("bg-white hover:text-sky-600 align-top")}>
               <td
                 className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5",
-                  "border-b border-gray-200"
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200"
                 )}
               >
                 <p>Riwayat Penyakit Keluarga</p>
@@ -923,8 +1035,7 @@ export default function Template() {
             <tr className={cn("bg-white hover:text-sky-600 align-top")}>
               <td
                 className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5",
-                  "border-b border-gray-200"
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200"
                 )}
               >
                 <p>Pola Konsumsi Makan</p>
@@ -933,23 +1044,79 @@ export default function Template() {
             <tr className={cn("bg-white hover:text-sky-600 align-top")}>
               <td
                 className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5",
-                  "border-b border-gray-200",
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
                   "font-semibold"
                 )}
               >
                 <p>Jumlah</p>
               </td>
+              {/* DM */}
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>
+                  {watch("kesehatan")
+                    ?.filter((_, i) =>
+                      skriningRiwKesehatan
+                        .filter((skrin) => skrin.kategori?.includes("DM"))
+                        .map((_, skrinIdx) => skrinIdx)
+                        .includes(i + 1)
+                    )
+                    ?.reduce((acc, val) => acc + val, 0) +
+                    watch("penyakit")
+                      ?.filter((_, i) =>
+                        skriningRiwPenyakit
+                          .filter((skrin) => skrin.kategori?.includes("DM"))
+                          .map((_, skrinIdx) => skrinIdx)
+                          .includes(i + 1)
+                      )
+                      ?.reduce((acc, val) => acc + val, 0) +
+                    watch("penyakit_keluarga")
+                      ?.filter((_, i) =>
+                        skriningRiwKeluarga
+                          .filter((skrin) => skrin.kategori?.includes("DM"))
+                          .map((_, skrinIdx) => skrinIdx)
+                          .includes(i + 1)
+                      )
+                      ?.reduce((acc, val) => acc + val, 0) +
+                    watch("pola_makan")
+                      ?.filter((_, i) =>
+                        skriningPolaMakan
+                          .filter((skrin) => skrin.kategori?.includes("DM"))
+                          .map((_, skrinIdx) => skrinIdx)
+                          .includes(i + 1)
+                      )
+                      ?.reduce((acc, val) => acc + val, 0)}
+                </p>
+              </td>
             </tr>
             <tr className={cn("bg-white hover:text-sky-600 align-top")}>
               <td
                 className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5",
-                  "border-b border-gray-200",
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
                   "font-semibold"
                 )}
               >
                 <p>Total tambahan skor</p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>
+                  {watch("kesehatan")?.reduce((acc, val) => acc + val, 0) +
+                    watch("penyakit")?.reduce((acc, val) => acc + val, 0) +
+                    watch("penyakit_keluarga")?.reduce(
+                      (acc, val) => acc + val,
+                      0
+                    ) +
+                    watch("pola_makan")?.reduce((acc, val) => acc + val, 0)}
+                </p>
               </td>
             </tr>
           </tbody>
