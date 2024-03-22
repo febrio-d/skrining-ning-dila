@@ -85,12 +85,30 @@ export default function Template() {
   const [desaIdx, setDesaIdx] = useState<number>(0);
 
   const penyakit = [
-    { label: "Diabetes Mellitus", onClick: () => false },
-    { label: "Hipertensi", onClick: () => false },
-    { label: "Stroke", onClick: () => false },
-    { label: "Penyakit Jantung", onClick: () => false },
-    { label: "Gagal Ginjal", onClick: () => false },
-    { label: "Osteoartritis", onClick: () => false },
+    {
+      label: "Diabetes Mellitus",
+      link: "https://drive.google.com/file/d/1bocq-mLMNdtaFRmWcRX2D_uZl5fnov0W/view?usp=sharing",
+    },
+    {
+      label: "Hipertensi",
+      link: "https://drive.google.com/file/d/1FKPb5eTDtLF3AU5czlimVDoyHaKZeJEj/view?usp=sharing",
+    },
+    {
+      label: "Stroke",
+      link: "https://drive.google.com/file/d/1hbGeJ7GB1Hc2hH2NkLzXHebTuySaOhdF/view?usp=sharing",
+    },
+    {
+      label: "Penyakit Jantung",
+      link: "https://drive.google.com/file/d/1hbGeJ7GB1Hc2hH2NkLzXHebTuySaOhdF/view?usp=sharing",
+    },
+    {
+      label: "Gagal Ginjal",
+      link: "https://drive.google.com/file/d/102-LavSi8lEjPgqFd1coj1W7oJS6WpfO/view?usp=sharing",
+    },
+    {
+      label: "Osteoarthritis",
+      link: "https://drive.google.com/file/d/1hbGeJ7GB1Hc2hH2NkLzXHebTuySaOhdF/view?usp=sharing",
+    },
   ];
   const [penyakitIdx, setPenyakitIdx] = useState<number>(0);
 
@@ -345,7 +363,7 @@ export default function Template() {
                   <div className="p-0.5" key={val.label}>
                     <Menu.Item>
                       {({ active }) => (
-                        <button
+                        <a
                           className={cn(
                             // "group flex w-full items-center rounded-md px-2 py-2 text-sm",
                             "relative flex w-full items-center rounded-md p-2 text-sm",
@@ -353,10 +371,11 @@ export default function Template() {
                               ? "bg-slate-200 text-sky-600"
                               : "text-gray-900"
                           )}
-                          onClick={val.onClick}
+                          target="_blank"
+                          href={val.link}
                         >
                           {val.label}
-                        </button>
+                        </a>
                       )}
                     </Menu.Item>
                   </div>
@@ -1001,7 +1020,7 @@ export default function Template() {
               <td className="border-r">Stroke</td>
               <td className="border-r">Penyakit Jantung</td>
               <td className="border-r">Gagal Ginjal</td>
-              <td>Osteoartritis</td>
+              <td>Osteoarthritis</td>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 overflow-y-auto">
