@@ -10,11 +10,9 @@ export const dynamic = "force-dynamic";
 
 export default function Home() {
   return (
-    <main className="fixed inset-0 overflow-y-auto">
-      <div className="flex min-h-full items-center justify-center text-center">
-        <Template />
-      </div>
-    </main>
+    <div className="flex min-h-full items-center justify-center text-center">
+      <Template />
+    </div>
     // <main className="relative flex min-h-screen flex-col items-center justify-center">
     //   <Link
     //     href="https://vercel.com/templates/next.js/postgres-prisma"

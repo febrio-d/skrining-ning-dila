@@ -9,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { RiArrowDropDownLine } from "react-icons/ri";
+import { Button } from "./button";
 
 export default function Template() {
   const Schema = z.object({
@@ -246,11 +247,21 @@ export default function Template() {
   useEffect(() => {
     const subscription = watch((value, { name, type }) => {
       if (name?.includes("penyakit")) {
-        console.log("oke");
+        // console.log(
+        //   skriningRiwPenyakit.flatMap((skrin, idx) =>
+        //     skrin.kategori?.includes("DM") ? [idx] : []
+        //   )
+        // );
         console.log(
-          skriningRiwPenyakit
-            .filter((skrin) => skrin.kategori?.includes("DM"))
-            .map((_, skrinIdx) => skrinIdx)
+          watch("kesehatan")
+            ?.filter((_, i) =>
+              skriningRiwPenyakit
+                .flatMap((skrin, idx) =>
+                  skrin.kategori?.includes("DM") ? [idx] : []
+                )
+                .includes(i)
+            )
+            ?.reduce((acc, val) => acc + val, 0)
         );
       }
     });
@@ -314,14 +325,63 @@ export default function Template() {
     );
   }, []);
 
+  const IMT =
+    watch("pasien.tb")?.toString().length > 2 &&
+    watch("pasien.bb")?.toString().length > 1
+      ? (
+          watch("pasien.bb") /
+          (((watch("pasien.tb") / 100) * watch("pasien.tb")) / 100)
+        ).toFixed(1)
+      : "";
+
+  const PlusIMT = parseInt(IMT) >= 30 ? 1 : 0;
+
+  const KesehatanScoreFunc = (ill: KatPenyakit): number => {
+    return watch("kesehatan")
+      ?.filter((_, i) =>
+        skriningRiwKesehatan
+          .flatMap((skrin, idx) => (skrin.kategori?.includes(ill) ? [idx] : []))
+          .includes(i)
+      )
+      ?.reduce((acc, val) => acc + val, 0);
+  };
+
+  const PenyakitScoreFunc = (ill: KatPenyakit): number => {
+    return watch("penyakit")
+      ?.filter((_, i) =>
+        skriningRiwPenyakit
+          .flatMap((skrin, idx) => (skrin.kategori?.includes(ill) ? [idx] : []))
+          .includes(i)
+      )
+      ?.reduce((acc, val) => acc + val, 0);
+  };
+
+  const KeluargaScoreFunc = (ill: KatPenyakit): number => {
+    return watch("penyakit_keluarga")
+      ?.filter((_, i) =>
+        skriningRiwPenyakit
+          .flatMap((skrin, idx) => (skrin.kategori?.includes(ill) ? [idx] : []))
+          .includes(i)
+      )
+      ?.reduce((acc, val) => acc + val, 0);
+  };
+
+  const PolaScoreFunc = (ill: KatPenyakit): number => {
+    return watch("pola_makan")
+      ?.filter((_, i) =>
+        skriningPolaMakan
+          .flatMap((skrin, idx) => (skrin.kategori?.includes(ill) ? [idx] : []))
+          .includes(i)
+      )
+      ?.reduce((acc, val) => acc + val, 0);
+  };
+
   return (
-    <div className="flex w-full transform flex-col gap-3 overflow-hidden bg-white p-6 text-left align-middle shadow-xl transition-all">
+    <div className="flex w-full transform bg-white flex-col gap-3 overflow-hidden p-6 text-left align-middle shadow-xl transition-all">
       <div className="flex gap-1">
         <Tab.Group
           selectedIndex={desaIdx}
           onChange={(index) => {
-            console.log(index);
-
             setDesaIdx(index);
           }}
         >
@@ -387,7 +447,7 @@ export default function Template() {
       </div>
       <div
         className={cn(
-          "grid sm:grid-cols-7 gap-2 rounded-md border p-2 shadow",
+          "grid sm:grid-cols-7 gap-2 rounded-md border p-2 shadow relative",
           "grid-cols-3"
         )}
       >
@@ -684,60 +744,16 @@ export default function Template() {
               IMT
             </label>
           </div>
-          <p className="my-auto text-xs">
-            {watch("pasien.tb")?.toString().length > 2 &&
-            watch("pasien.bb")?.toString().length > 1
-              ? (
-                  watch("pasien.bb") /
-                  (((watch("pasien.tb") / 100) * watch("pasien.tb")) / 100)
-                ).toFixed(1)
-              : ""}
-          </p>
+          <p className="my-auto text-xs">{}</p>
         </div>
-        <div className="flex flex-col">
-          <div className="flex items-baseline justify-between">
-            <label htmlFor="imt" className="text-sm font-medium text-gray-900">
-              Tes
-            </label>
-          </div>
-          <p className="my-auto text-xs">
-            {watch("kesehatan")
-              ?.filter((_, i) =>
-                skriningRiwKesehatan
-                  .filter((skrin) => skrin.kategori?.includes("DM"))
-                  .map((_, skrinIdx) => skrinIdx)
-                  .includes(i)
-              )
-              ?.reduce((acc, val) => acc + val, 0) +
-              watch("penyakit")
-                ?.filter((_, i) =>
-                  skriningRiwPenyakit
-                    .filter((skrin) => skrin.kategori?.includes("DM"))
-                    .map((_, skrinIdx) => skrinIdx)
-                    .includes(i)
-                )
-                ?.reduce((acc, val) => acc + val, 0) +
-              watch("penyakit_keluarga")
-                ?.filter((_, i) =>
-                  skriningRiwKeluarga
-                    .filter((skrin) => skrin.kategori?.includes("DM"))
-                    .map((_, skrinIdx) => skrinIdx)
-                    .includes(i)
-                )
-                ?.reduce((acc, val) => acc + val, 0) +
-              watch("pola_makan")
-                ?.filter((_, i) =>
-                  skriningPolaMakan
-                    .filter((skrin) => skrin.kategori?.includes("DM"))
-                    .map((_, skrinIdx) => skrinIdx)
-                    .includes(i)
-                )
-                ?.reduce((acc, val) => acc + val, 0)}
-          </p>
+        <div className="absolute bottom-2 right-2">
+          <Button className="rounded-md" color="green">
+            Simpan
+          </Button>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <div className="border shadow">
+        <div className="border shadow bg-white">
           <p className="select-none rounded-t bg-sky-700 py-1.5 text-center text-sm uppercase tracking-normal text-slate-50">
             Riwayat Kesehatan
           </p>
@@ -817,7 +833,7 @@ export default function Template() {
             ))}
           </div>
         </div>
-        <div className="border shadow">
+        <div className="border shadow bg-white">
           <p className="select-none rounded-t bg-sky-700 py-1.5 text-center text-sm uppercase tracking-normal text-slate-50">
             Riwayat Penyakit Pribadi
           </p>
@@ -876,7 +892,7 @@ export default function Template() {
             ))}
           </div>
         </div>
-        <div className="border shadow">
+        <div className="border shadow bg-white">
           <p className="select-none rounded-t bg-sky-700 py-1.5 text-center text-sm uppercase tracking-normal text-slate-50">
             Riwayat Penyakit Keluarga
           </p>
@@ -935,7 +951,7 @@ export default function Template() {
             ))}
           </div>
         </div>
-        <div className="border shadow">
+        <div className="border shadow bg-white">
           <p className="select-none rounded-t bg-sky-700 py-1.5 text-center text-sm uppercase tracking-normal text-slate-50">
             Pola Konsumsi Makan
           </p>
@@ -997,12 +1013,12 @@ export default function Template() {
       </div>
       <div
         className={cn(
-          "h-fit w-full flex-1 overflow-hidden overflow-y-auto rounded shadow"
+          "h-fit w-full flex-1 bg-white overflow-hidden rounded shadow"
         )}
       >
         <table className="min-w-full text-sm">
           <thead>
-            <tr className="sticky top-0 font-semibold z-20 bg-slate-100 *:border-r *:border-r-slate-50 *:px-4 *:py-2 *:text-center xl:-top-[1px]">
+            <tr className="font-semibold bg-slate-100 *:border-r *:border-r-slate-50 *:px-4 *:py-2 *:text-center xl:-top-[1px]">
               <td rowSpan={2}>Skrining Riwayat Kesehatan</td>
               <td colSpan={6} className="!border-r-0">
                 Jenis Resiko Penyakit
@@ -1023,41 +1039,113 @@ export default function Template() {
               <td>Osteoarthritis</td>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 overflow-y-auto">
-            <tr className={cn("bg-white hover:text-sky-600 align-top")}>
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200"
-                )}
-              >
-                <p>Riwayat Kesehatan</p>
+          <tbody className="divide-y divide-gray-200">
+            <tr
+              className={cn(
+                "bg-white hover:text-sky-600 align-top *:whitespace-pre-wrap *:align-middle *:px-2 *:py-1.5 *:border-b *:border-gray-200 *:text-center"
+              )}
+            >
+              <td>
+                <p className="text-left">Riwayat Kesehatan</p>
+              </td>
+              <td>
+                <p>{KesehatanScoreFunc("DM")}</p>
+              </td>
+              <td>
+                <p>{KesehatanScoreFunc("HT")}</p>
+              </td>
+              <td>
+                <p>{KesehatanScoreFunc("S")}</p>
+              </td>
+              <td>
+                <p>{KesehatanScoreFunc("J")}</p>
+              </td>
+              <td>
+                <p>{KesehatanScoreFunc("G")}</p>
+              </td>
+              <td>
+                <p>{KesehatanScoreFunc("OA")}</p>
               </td>
             </tr>
-            <tr className={cn("bg-white hover:text-sky-600 align-top")}>
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200"
-                )}
-              >
-                <p>Riwayat Penyakit Pribadi</p>
+            <tr
+              className={cn(
+                "bg-white hover:text-sky-600 align-top *:whitespace-pre-wrap *:align-middle *:px-2 *:py-1.5 *:border-b *:border-gray-200 *:text-center"
+              )}
+            >
+              <td>
+                <p className="text-left">Riwayat Penyakit Pribadi</p>
+              </td>
+              <td>
+                <p>{PenyakitScoreFunc("DM")}</p>
+              </td>
+              <td>
+                <p>{PenyakitScoreFunc("HT")}</p>
+              </td>
+              <td>
+                <p>{PenyakitScoreFunc("S")}</p>
+              </td>
+              <td>
+                <p>{PenyakitScoreFunc("J")}</p>
+              </td>
+              <td>
+                <p>{PenyakitScoreFunc("G")}</p>
+              </td>
+              <td>
+                <p>{PenyakitScoreFunc("OA")}</p>
               </td>
             </tr>
-            <tr className={cn("bg-white hover:text-sky-600 align-top")}>
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200"
-                )}
-              >
-                <p>Riwayat Penyakit Keluarga</p>
+            <tr
+              className={cn(
+                "bg-white hover:text-sky-600 align-top *:whitespace-pre-wrap *:align-middle *:px-2 *:py-1.5 *:border-b *:border-gray-200 *:text-center"
+              )}
+            >
+              <td>
+                <p className="text-left">Riwayat Penyakit Keluarga</p>
+              </td>
+              <td>
+                <p>{KeluargaScoreFunc("DM")}</p>
+              </td>
+              <td>
+                <p>{KeluargaScoreFunc("HT")}</p>
+              </td>
+              <td>
+                <p>{KeluargaScoreFunc("S")}</p>
+              </td>
+              <td>
+                <p>{KeluargaScoreFunc("J")}</p>
+              </td>
+              <td>
+                <p>{KeluargaScoreFunc("G")}</p>
+              </td>
+              <td>
+                <p>{KeluargaScoreFunc("OA")}</p>
               </td>
             </tr>
-            <tr className={cn("bg-white hover:text-sky-600 align-top")}>
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200"
-                )}
-              >
-                <p>Pola Konsumsi Makan</p>
+            <tr
+              className={cn(
+                "bg-white hover:text-sky-600 align-top *:whitespace-pre-wrap *:align-middle *:px-2 *:py-1.5 *:border-b *:border-gray-200 *:text-center"
+              )}
+            >
+              <td>
+                <p className="text-left">Pola Konsumsi Makan</p>
+              </td>
+              <td>
+                <p>{PolaScoreFunc("DM")}</p>
+              </td>
+              <td>
+                <p>{PolaScoreFunc("HT")}</p>
+              </td>
+              <td>
+                <p>{PolaScoreFunc("S")}</p>
+              </td>
+              <td>
+                <p>{PolaScoreFunc("J")}</p>
+              </td>
+              <td>
+                <p>{PolaScoreFunc("G")}</p>
+              </td>
+              <td>
+                <p>{PolaScoreFunc("OA")}</p>
               </td>
             </tr>
             <tr className={cn("bg-white hover:text-sky-600 align-top")}>
@@ -1069,7 +1157,6 @@ export default function Template() {
               >
                 <p>Jumlah</p>
               </td>
-              {/* DM */}
               <td
                 className={cn(
                   "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
@@ -1077,38 +1164,75 @@ export default function Template() {
                 )}
               >
                 <p>
-                  {watch("kesehatan")
-                    ?.filter((_, i) =>
-                      skriningRiwKesehatan
-                        .filter((skrin) => skrin.kategori?.includes("DM"))
-                        .map((_, skrinIdx) => skrinIdx)
-                        .includes(i + 1)
-                    )
-                    ?.reduce((acc, val) => acc + val, 0) +
-                    watch("penyakit")
-                      ?.filter((_, i) =>
-                        skriningRiwPenyakit
-                          .filter((skrin) => skrin.kategori?.includes("DM"))
-                          .map((_, skrinIdx) => skrinIdx)
-                          .includes(i + 1)
-                      )
-                      ?.reduce((acc, val) => acc + val, 0) +
-                    watch("penyakit_keluarga")
-                      ?.filter((_, i) =>
-                        skriningRiwKeluarga
-                          .filter((skrin) => skrin.kategori?.includes("DM"))
-                          .map((_, skrinIdx) => skrinIdx)
-                          .includes(i + 1)
-                      )
-                      ?.reduce((acc, val) => acc + val, 0) +
-                    watch("pola_makan")
-                      ?.filter((_, i) =>
-                        skriningPolaMakan
-                          .filter((skrin) => skrin.kategori?.includes("DM"))
-                          .map((_, skrinIdx) => skrinIdx)
-                          .includes(i + 1)
-                      )
-                      ?.reduce((acc, val) => acc + val, 0)}
+                  {KesehatanScoreFunc("DM") +
+                    PenyakitScoreFunc("DM") +
+                    KeluargaScoreFunc("DM") +
+                    PolaScoreFunc("DM")}
+                </p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>
+                  {KesehatanScoreFunc("HT") +
+                    PenyakitScoreFunc("HT") +
+                    KeluargaScoreFunc("HT") +
+                    PolaScoreFunc("HT")}
+                </p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>
+                  {KesehatanScoreFunc("S") +
+                    PenyakitScoreFunc("S") +
+                    KeluargaScoreFunc("S") +
+                    PolaScoreFunc("S")}
+                </p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>
+                  {KesehatanScoreFunc("J") +
+                    PenyakitScoreFunc("J") +
+                    KeluargaScoreFunc("J") +
+                    PolaScoreFunc("J")}
+                </p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>
+                  {KesehatanScoreFunc("G") +
+                    PenyakitScoreFunc("G") +
+                    KeluargaScoreFunc("G") +
+                    PolaScoreFunc("G")}
+                </p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>
+                  {KesehatanScoreFunc("OA") +
+                    PenyakitScoreFunc("OA") +
+                    KeluargaScoreFunc("OA") +
+                    PolaScoreFunc("OA")}
                 </p>
               </td>
             </tr>
@@ -1121,6 +1245,7 @@ export default function Template() {
               >
                 <p>Total tambahan skor</p>
               </td>
+
               <td
                 className={cn(
                   "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
@@ -1128,13 +1253,81 @@ export default function Template() {
                 )}
               >
                 <p>
-                  {watch("kesehatan")?.reduce((acc, val) => acc + val, 0) +
-                    watch("penyakit")?.reduce((acc, val) => acc + val, 0) +
-                    watch("penyakit_keluarga")?.reduce(
-                      (acc, val) => acc + val,
-                      0
-                    ) +
-                    watch("pola_makan")?.reduce((acc, val) => acc + val, 0)}
+                  {KesehatanScoreFunc("DM") +
+                    PenyakitScoreFunc("DM") +
+                    KeluargaScoreFunc("DM") +
+                    PolaScoreFunc("DM") +
+                    PlusIMT}
+                </p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>
+                  {KesehatanScoreFunc("HT") +
+                    PenyakitScoreFunc("HT") +
+                    KeluargaScoreFunc("HT") +
+                    PolaScoreFunc("HT") +
+                    PlusIMT}
+                </p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>
+                  {KesehatanScoreFunc("S") +
+                    PenyakitScoreFunc("S") +
+                    KeluargaScoreFunc("S") +
+                    PolaScoreFunc("S") +
+                    PlusIMT}
+                </p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>
+                  {KesehatanScoreFunc("J") +
+                    PenyakitScoreFunc("J") +
+                    KeluargaScoreFunc("J") +
+                    PolaScoreFunc("J") +
+                    PlusIMT}
+                </p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>
+                  {KesehatanScoreFunc("G") +
+                    PenyakitScoreFunc("G") +
+                    KeluargaScoreFunc("G") +
+                    PolaScoreFunc("G") +
+                    PlusIMT}
+                </p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>
+                  {KesehatanScoreFunc("OA") +
+                    PenyakitScoreFunc("OA") +
+                    KeluargaScoreFunc("OA") +
+                    PolaScoreFunc("OA") +
+                    PlusIMT}
                 </p>
               </td>
             </tr>
