@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default function Home() {
   return (
-    <div className="flex min-h-full items-center justify-center text-center">
+    <div className="flex min-h-full justify-center text-center">
       <Template />
     </div>
     // <main className="relative flex min-h-screen flex-col items-center justify-center">

@@ -8,7 +8,7 @@ export default function MenuLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main>
+    <main className="h-full">
       <div className="bg-slate-100 p-4">
         <div className="grid grid-cols-3 gap-2">
           <div className="flex gap-2 items-center">
@@ -34,8 +34,8 @@ export default function MenuLayout({
           <User />
         </div>
       </div>
-      {children}
-      <div className="py-2 bg-white">
+      <div className="min-h-[calc(100vh-128px)]">{children}</div>
+      <div className="py-2 bg-white/10">
         <p className="text-sm">&copy; 2024 dr. Afrizal Kurniawan</p>
       </div>
     </main>

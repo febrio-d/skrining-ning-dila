@@ -5,11 +5,12 @@ import { SelectInput } from "@/components/select";
 import { cn, getAgeAll } from "@/lib/utils";
 import { Menu, Tab, Transition } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { Button } from "./button";
+import { desa } from "@/lib/types";
 
 export default function Template() {
   const Schema = z.object({
@@ -70,19 +71,6 @@ export default function Template() {
   //   return () => subscription.unsubscribe();
   // }, [watch]);
 
-  const desa = [
-    "Bogotanjung",
-    "Tlogoayu",
-    "Wuwur",
-    "Pantirejo",
-    "Sugihrejo",
-    "Mojolawaran",
-    "Karaban",
-    "Sambirejo",
-    "Kosekan",
-    "Kuryokalangan",
-    "Gebang",
-  ];
   const [desaIdx, setDesaIdx] = useState<number>(0);
 
   const penyakit = [
@@ -325,14 +313,13 @@ export default function Template() {
     );
   }, []);
 
-  const IMT =
-    watch("pasien.tb")?.toString().length > 2 &&
-    watch("pasien.bb")?.toString().length > 1
-      ? (
-          watch("pasien.bb") /
-          (((watch("pasien.tb") / 100) * watch("pasien.tb")) / 100)
-        ).toFixed(1)
+  const tb = watch("pasien.tb");
+  const bb = watch("pasien.bb");
+  const IMT = useMemo(() => {
+    return tb?.toString().length > 2 && bb?.toString().length > 1
+      ? (bb / (((tb / 100) * tb) / 100)).toFixed(1)
       : "";
+  }, [bb, tb]);
 
   const PlusIMT = parseInt(IMT) >= 30 ? 1 : 0;
 
@@ -402,9 +389,9 @@ export default function Template() {
           <div className="relative">
             <Menu.Button
               className={cn(
-                "inline-flex p-2.5 text-center text-sm focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50",
+                "inline-flex text-center text-sm focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50",
                 "rounded-md bg-gray-900/20 font-semibold text-gray-700 active:bg-slate-300",
-                "px-4 py-[8px]"
+                "p-2"
               )}
             >
               <RiArrowDropDownLine className="h-5 w-5" />

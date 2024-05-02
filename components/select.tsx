@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-// import { useTheme } from "next-themes";
 import Select, { Props, GroupBase } from "react-select";
 import AsyncSelect, { AsyncProps } from "react-select/async";
 import CreatableSelect, { CreatableProps } from "react-select/creatable";
@@ -25,7 +24,6 @@ export function SelectInput({
   inputCenter = false,
   ...props
 }: SelectProps) {
-  //   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -46,6 +44,7 @@ export function SelectInput({
 
   return (
     <Select
+      noOptionsMessage={noOptionsMessage || ((e) => "Tidak ada pilihan")}
       styles={{
         control: (base, props) => ({
           ...base,
@@ -54,7 +53,9 @@ export function SelectInput({
           borderColor: props.isFocused
             ? "rgb(6 182 212)" //cyan-500
             : "rgb(209 213 219)", //gray-300
-          backgroundColor: "rgb(249 250 251)",
+          backgroundColor: props.isDisabled
+            ? "rgb(243 244 246)"
+            : "rgb(249 250 251)",
           paddingTop: size === "md" ? "3px" : "0px",
           paddingBottom: size === "md" ? "3px" : "0px",
           fontSize: size === "md" ? "14px" : "12px",
@@ -144,15 +145,6 @@ export function SelectInput({
           fontSize: size === "md" ? "14px" : "12px",
           lineHeight: size === "md" ? "20px" : "16px",
           backgroundColor: (() => {
-            // if (theme === "dark") {
-            //   if (props.isSelected) {
-            //     return "rgb(107 114 128)"; //gray-500,
-            //   }
-            //   if (props.isFocused) {
-            //     return "rgb(75 85 99)"; //gray-600,
-            //   }
-            //   return "rgb(55 65 81)"; //gray-700
-            // } else {
             if (props.isSelected) {
               return "rgb(56 189 248)"; //sky-400
             }
@@ -160,7 +152,6 @@ export function SelectInput({
               return "rgb(224 242 254)"; //sky-100
             }
             return "rgb(249 250 251)"; //gray-50
-            // }
           })(),
         }),
         noOptionsMessage: (base, prop) => ({
@@ -180,6 +171,7 @@ export function CreatableSelectInput<
   IsMulti extends boolean = false,
   Group extends GroupBase<Option> = GroupBase<Option>
 >({
+  noOptionsMessage,
   size = "md",
   withSpan = false,
   ...props
@@ -188,7 +180,6 @@ export function CreatableSelectInput<
   IsMulti,
   Group
 >) {
-  //   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -209,6 +200,7 @@ export function CreatableSelectInput<
 
   return (
     <CreatableSelect
+      noOptionsMessage={noOptionsMessage || ((e) => "Tidak ada pilihan")}
       styles={{
         control: (base, props) => ({
           ...base,
@@ -217,7 +209,9 @@ export function CreatableSelectInput<
           borderColor: props.isFocused
             ? "rgb(6 182 212)" //cyan-500
             : "rgb(209 213 219)", //gray-300
-          backgroundColor: "rgb(249 250 251)",
+          backgroundColor: props.isDisabled
+            ? "rgb(243 244 246)"
+            : "rgb(249 250 251)",
           paddingTop: size === "md" ? "3px" : "0px",
           paddingBottom: size === "md" ? "3px" : "0px",
           fontSize: size === "md" ? "14px" : "12px",
@@ -307,15 +301,6 @@ export function CreatableSelectInput<
           fontSize: size === "md" ? "14px" : "12px",
           lineHeight: size === "md" ? "20px" : "16px",
           backgroundColor: (() => {
-            // if (theme === "dark") {
-            //   if (props.isSelected) {
-            //     return "rgb(107 114 128)"; //gray-500,
-            //   }
-            //   if (props.isFocused) {
-            //     return "rgb(75 85 99)"; //gray-600,
-            //   }
-            //   return "rgb(55 65 81)"; //gray-700
-            // } else {
             if (props.isSelected) {
               return "rgb(56 189 248)"; //sky-400
             }
@@ -323,7 +308,6 @@ export function CreatableSelectInput<
               return "rgb(224 242 254)"; //sky-100
             }
             return "rgb(249 250 251)"; //gray-50
-            // }
           })(),
         }),
         noOptionsMessage: (base, prop) => ({
@@ -343,6 +327,7 @@ export function AsyncSelectInput<
   IsMulti extends boolean = false,
   Group extends GroupBase<Option> = GroupBase<Option>
 >({
+  noOptionsMessage,
   size = "md",
   withSpan,
   ...props
@@ -351,7 +336,6 @@ export function AsyncSelectInput<
   IsMulti,
   Group
 >) {
-  //   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -372,6 +356,7 @@ export function AsyncSelectInput<
 
   return (
     <AsyncSelect
+      noOptionsMessage={noOptionsMessage || ((e) => "Tidak ada pilihan")}
       styles={{
         control: (base, props) => ({
           ...base,
@@ -380,7 +365,9 @@ export function AsyncSelectInput<
           borderColor: props.isFocused
             ? "rgb(6 182 212)" //cyan-500
             : "rgb(209 213 219)", //gray-300
-          backgroundColor: "rgb(249 250 251)",
+          backgroundColor: props.isDisabled
+            ? "rgb(243 244 246)"
+            : "rgb(249 250 251)",
           paddingTop: size === "md" ? "3px" : "0px",
           paddingBottom: size === "md" ? "3px" : "0px",
           fontSize: size === "md" ? "14px" : "12px",
@@ -470,15 +457,6 @@ export function AsyncSelectInput<
           fontSize: size === "md" ? "14px" : "12px",
           lineHeight: size === "md" ? "20px" : "16px",
           backgroundColor: (() => {
-            // if (theme === "dark") {
-            //   if (props.isSelected) {
-            //     return "rgb(107 114 128)"; //gray-500,
-            //   }
-            //   if (props.isFocused) {
-            //     return "rgb(75 85 99)"; //gray-600,
-            //   }
-            //   return "rgb(55 65 81)"; //gray-700
-            // } else {
             if (props.isSelected) {
               return "rgb(56 189 248)"; //sky-400
             }
@@ -486,7 +464,6 @@ export function AsyncSelectInput<
               return "rgb(224 242 254)"; //sky-100
             }
             return "rgb(249 250 251)"; //gray-50
-            // }
           })(),
         }),
         noOptionsMessage: (base, prop) => ({
