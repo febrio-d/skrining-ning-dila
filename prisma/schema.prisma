@@ -7,6 +7,8 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
+  // url       = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL")
   url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
   directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
@@ -15,7 +17,7 @@ model users {
   id        Int      @id @default(autoincrement())
   id_desa   Int?
   nama      String
-  username  String    @unique
+  username  String    
   password  String
   createdAt DateTime  @default(now())
 }

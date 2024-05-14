@@ -8,7 +8,7 @@ import Pati from "@/assets/img/pati.png";
 import { z } from "zod";
 import React from "react";
 import toast from "react-hot-toast";
-import { users } from "@prisma/client";
+import type { users } from "@prisma/client";
 import { useRouter } from "next/navigation";
 
 export default function Login() {
