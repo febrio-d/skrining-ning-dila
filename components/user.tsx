@@ -2,12 +2,17 @@
 
 import { cn } from "@/lib/utils";
 import { Menu, Transition } from "@headlessui/react";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 import { Fragment } from "react";
 import { LuUser } from "react-icons/lu";
 
-export default function User() {
+export default function User({ user }: { user: string | undefined }) {
+  const { push } = useRouter();
   const logout = () => {
-    return;
+    Cookies.remove("user");
+    Cookies.remove("id_desa");
+    push("/auth");
   };
 
   return (
@@ -34,7 +39,7 @@ export default function User() {
           >
             <div className="*:px-2 divide-y-[1px] divide-slate-400/80">
               <Menu.Item disabled>
-                <p className="text-sm py-2">Inputor Desa Karaban</p>
+                <p className="text-sm py-2">{user}</p>
               </Menu.Item>
               <Menu.Item>
                 {({ active }) => (
@@ -44,6 +49,7 @@ export default function User() {
                       "flex w-full items-center px-2 py-2 text-xs",
                       active ? "bg-slate-100 text-slate-600" : "text-gray-900"
                     )}
+                    onClick={logout}
                   >
                     Logout
                   </button>

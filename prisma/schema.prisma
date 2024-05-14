@@ -13,7 +13,49 @@ datasource db {
 
 model users {
   id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  createdAt DateTime @default(now())
+  id_desa   Int?
+  nama      String
+  username  String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+}
+
+model pasien {
+  id      String  @id @default(uuid())
+  nik     String
+  nama    String
+  nama_kk String
+  desa    Int
+  jk      String
+  lahir   String
+  hp      String
+  skor    skor?
+  fisik   fisik?
+}
+
+model fisik {
+  id      String  @id @default(uuid())
+  id_pasien String @unique
+  pasien pasien @relation(fields: [id_pasien], references: [id])
+  td Int[]
+  gd Int
+  tb Int
+  bb Int
+}
+
+model skor {
+  id      String  @id @default(uuid())
+  id_pasien String @unique
+  pasien    pasien @relation(fields: [id_pasien], references: [id])
+  kesehatan Int[]
+  penyakit  Int[]
+  keluarga  Int[]
+  pola      Int[]
+  plusimt   Boolean @default(false)
+  dm        Int
+  ht        Int
+  s         Int
+  j         Int
+  g         Int
+  oa        Int
 }

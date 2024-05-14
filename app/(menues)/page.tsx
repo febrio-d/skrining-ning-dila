@@ -1,17 +1,26 @@
+import Template from "@/components/template";
+import CryptoJS, { AES } from "crypto-js";
+import { cookies } from "next/headers";
 // import Image from "next/image";
 // import Link from "next/link";
 // import { Suspense } from "react";
 // import Table from "@/components/table";
 // import TablePlaceholder from "@/components/table-placeholder";
 // import ExpandingArrow from "@/components/expanding-arrow";
-import Template from "@/components/template";
 
 export const dynamic = "force-dynamic";
 
 export default function Home() {
+  const isAuthed = cookies().get("user") !== (null || undefined);
+  const user = isAuthed
+    ? AES.decrypt(cookies().get("user")?.value!, "pkmgabus2").toString(
+        CryptoJS.enc.Utf8
+      )
+    : undefined;
+
   return (
     <div className="flex min-h-full justify-center text-center">
-      <Template />
+      <Template user={user} />
     </div>
     // <main className="relative flex min-h-screen flex-col items-center justify-center">
     //   <Link
