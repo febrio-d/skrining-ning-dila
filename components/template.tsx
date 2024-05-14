@@ -446,7 +446,7 @@ export default function Template({ user }: { user: string | undefined }) {
           setLoading(false);
         }
       })}
-      className="flex w-full transform flex-col gap-3 overflow-hidden p-6 text-left align-middle transition-all"
+      className="flex w-full transform flex-col gap-3 overflow-visible p-6 text-left align-middle transition-all"
     >
       <div className="gap-1 hidden sm:flex">
         <Tab.Group
