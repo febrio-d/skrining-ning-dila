@@ -25,13 +25,16 @@ export async function POST(request: Request) {
       user: user,
     };
     if (resp.user?.nama) {
+      console.log("oke");
       cookies().set(
         "user",
         AES.encrypt(resp.user.nama, "pkmgabus2").toString(),
-        { expires: 1 }
+        { maxAge: 60 * 60 * 24 }
       );
       if (resp.user.id_desa)
-        cookies().set("id_desa", String(resp.user.id_desa), { expires: 1 });
+        cookies().set("id_desa", String(resp.user.id_desa), {
+          maxAge: 60 * 60 * 24,
+        });
     }
     return NextResponse.json(resp);
   } catch (err) {
