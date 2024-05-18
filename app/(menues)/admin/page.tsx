@@ -63,17 +63,23 @@ export default function Admin() {
     };
   };
   const [hapus, hapusDispatch] = useReducer(hapusActs, hapusState);
+  const [hapusMutate, setHapusMutate] = useState<boolean>(false);
   const handleHapus = async () => {
+    setHapusMutate(true);
     try {
-      const resp = await fetch(`/skrining/${hapus.data?.id}`, {
+      const resp = await fetch(`/api/skrining/${hapus.data?.id}`, {
         method: "DELETE",
       });
       const data = await resp.json();
+      if (data.error) throw new Error(data.message);
       hapusDispatch({ modal: false });
       toast.success(data?.message);
       loadData();
     } catch (error) {
+      toast.error("Hapus pasien gagal");
       console.error(error);
+    } finally {
+      setHapusMutate(false);
     }
   };
 
@@ -262,7 +268,11 @@ export default function Admin() {
                     </p>
                   </div>
                   <div className="mt-4 flex justify-end gap-1">
-                    <Button color="red100" onClick={handleHapus}>
+                    <Button
+                      color="red100"
+                      onClick={handleHapus}
+                      loading={hapusMutate}
+                    >
                       Hapus
                     </Button>
                     <Button

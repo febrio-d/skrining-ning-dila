@@ -38,7 +38,7 @@ model pasien {
 model fisik {
   id      String  @id @default(uuid())
   id_pasien String @unique
-  pasien pasien @relation(fields: [id_pasien], references: [id])
+  pasien pasien @relation(fields: [id_pasien], references: [id], onDelete: Cascade)
   td Int[]
   gd Int
   tb Int
@@ -48,7 +48,7 @@ model fisik {
 model skor {
   id      String  @id @default(uuid())
   id_pasien String @unique
-  pasien    pasien @relation(fields: [id_pasien], references: [id])
+  pasien    pasien @relation(fields: [id_pasien], references: [id], onDelete: Cascade)
   kesehatan Int[]
   penyakit  Int[]
   keluarga  Int[]
