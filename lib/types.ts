@@ -23,11 +23,11 @@ export const penyakit = [
   },
   {
     label: "Stroke",
-    link: "https://drive.google.com/file/d/1hbGeJ7GB1Hc2hH2NkLzXHebTuySaOhdF/view?usp=sharing",
+    link: "https://drive.google.com/file/d/1sLb3mVzZV7ZezB8m_ZSL_Vd9rTXUJWem/view?usp=sharing",
   },
   {
     label: "Penyakit Jantung",
-    link: "https://drive.google.com/file/d/1hbGeJ7GB1Hc2hH2NkLzXHebTuySaOhdF/view?usp=sharing",
+    link: "https://drive.google.com/file/d/18gDqqo7acd_8jgz6Q7nx6ZTNrPBhfc_r/view?usp=sharing",
   },
   {
     label: "Gagal Ginjal",

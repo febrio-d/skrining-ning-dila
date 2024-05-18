@@ -4,8 +4,6 @@ import { v4 } from "uuid";
 
 export async function GET(request: Request) {
   try {
-    // console.log(body);
-    // return NextResponse.json({ me: "ok" });
     const pasien = await prisma.pasien.findMany({
       include: { fisik: true, skor: true },
     });
@@ -29,8 +27,17 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const body = await request.json();
   try {
-    // console.log(body);
-    // return NextResponse.json({ me: "ok" });
+    const cekPasien = await prisma.pasien.findFirst({
+      where: {
+        nik: body.pasien.nik,
+        //   password: body.password,
+      },
+    });
+    if (cekPasien)
+      return NextResponse.json({
+        error: false,
+        message: "NIK tidak duplikat",
+      });
     const id = v4();
     const pasien = prisma.pasien.create({
       data: {
@@ -72,7 +79,43 @@ export async function POST(request: Request) {
     const resp = {
       error: false,
       message: "Berhasil simpan skrining",
-      //   user: user,
+    };
+    return NextResponse.json(resp);
+  } catch (err) {
+    const error = err as Error;
+    console.error(error);
+    const resp = {
+      error: true,
+      message: error.message,
+    };
+    return NextResponse.json(resp);
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const pasien = prisma.pasien.delete({
+      where: {
+        id: params.id,
+      },
+    });
+    const fisik = prisma.fisik.delete({
+      where: {
+        id: params.id,
+      },
+    });
+    const skor = prisma.skor.delete({
+      where: {
+        id: params.id,
+      },
+    });
+    await prisma.$transaction([pasien, fisik, skor]);
+    const resp = {
+      error: false,
+      message: "Berhasil hapus pasien",
     };
     return NextResponse.json(resp);
   } catch (err) {

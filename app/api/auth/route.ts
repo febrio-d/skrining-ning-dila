@@ -25,7 +25,6 @@ export async function POST(request: Request) {
       user: user,
     };
     if (resp.user?.nama) {
-      console.log("oke");
       cookies().set(
         "user",
         AES.encrypt(resp.user.nama, "pkmgabus2").toString(),
