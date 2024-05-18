@@ -8,7 +8,7 @@ import { Dialog, Tab, Transition } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import { z } from "zod";
@@ -107,7 +107,6 @@ export default function Template({ user }: { user: string | undefined }) {
   }, [id_desa]);
 
   const [desaIdx, setDesaIdx] = useState<number>(0);
-  console.log(desaIdx);
 
   type KatPenyakit = "DM" | "HT" | "S" | "J" | "G" | "OA";
   const [skriningRiwKesehatan] = useState<
@@ -186,6 +185,7 @@ export default function Template({ user }: { user: string | undefined }) {
         "Ya, hasil kolesterol saya dinyatakan tinggi",
         "Tidak, hasil kolesterol saya normal",
       ],
+      kategori: ["S", "J"],
     },
     {
       pertanyaan: "Apakah anda punya kebiasaan kurang minum air putih?",
@@ -302,23 +302,28 @@ export default function Template({ user }: { user: string | undefined }) {
   //   return () => subscription.unsubscribe();
   // }, [watch]);
 
+  const initialized = useRef<boolean>(false);
   useEffect(() => {
-    setValue(
-      "kesehatan",
-      Array.from({ length: skriningRiwKesehatan.length }, () => 0)
-    );
-    setValue(
-      "penyakit",
-      Array.from({ length: skriningRiwPenyakit.length }, () => 0)
-    );
-    setValue(
-      "penyakit_keluarga",
-      Array.from({ length: skriningRiwKeluarga.length }, () => 0)
-    );
-    setValue(
-      "pola_makan",
-      Array.from({ length: skriningPolaMakan.length }, () => 0)
-    );
+    if (!initialized.current) {
+      // loadData();
+      setValue(
+        "kesehatan",
+        Array.from({ length: skriningRiwKesehatan.length }, () => 0)
+      );
+      setValue(
+        "penyakit",
+        Array.from({ length: skriningRiwPenyakit.length }, () => 0)
+      );
+      setValue(
+        "penyakit_keluarga",
+        Array.from({ length: skriningRiwKeluarga.length }, () => 0)
+      );
+      setValue(
+        "pola_makan",
+        Array.from({ length: skriningPolaMakan.length }, () => 0)
+      );
+      initialized.current = true;
+    }
   }, []);
 
   const tb = watch("pasien.tb");
@@ -354,7 +359,7 @@ export default function Template({ user }: { user: string | undefined }) {
   const KeluargaScoreFunc = (ill: KatPenyakit): number => {
     return watch("penyakit_keluarga")
       ?.filter((_, i) =>
-        skriningRiwPenyakit
+        skriningRiwKeluarga
           .flatMap((skrin, idx) => (skrin.kategori?.includes(ill) ? [idx] : []))
           .includes(i)
       )
@@ -410,7 +415,26 @@ export default function Template({ user }: { user: string | undefined }) {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [showSkor, setShowSkor] = useState<boolean>(false);
-  const [showSkrining, setShowSkrining] = useState<boolean>(false);
+  const [showSkrining, setShowSkrining] = useState<boolean>(true);
+
+  // const loadData = async () => {
+  //   try {
+  //     const resp = await fetch(
+  //       `api/skrining/1b6881eb-f5b9-49a6-bc0e-7ee99bbdf262`,
+  //       {
+  //         method: "GET",
+  //       }
+  //     );
+  //     const json = await resp.json();
+  //     if (json.error) throw new Error(json.message);
+  //     setValue("penyakit", json.penyakit);
+  //     setValue("kesehatan", json.kesehatan);
+  //     setValue("penyakit_keluarga", json.keluarga);
+  //     setValue("pola_makan", json.pola);
+  //   } catch (err) {
+  //     toast.error("Pasien kosong", { position: "top-right" });
+  //   }
+  // };
 
   return (
     <form
@@ -448,6 +472,263 @@ export default function Template({ user }: { user: string | undefined }) {
       })}
       className="flex w-full transform flex-col gap-3 overflow-visible p-6 text-left align-middle transition-all"
     >
+      {/* <div
+        className={cn(
+          "h-fit w-fit z-20 flex-1 bg-white overflow-hidden rounded shadow sticky top-0 left-0"
+        )}
+      >
+        <table className="min-w-full text-sm">
+          <thead>
+            <tr className="font-semibold bg-slate-100 *:border-r *:border-r-slate-50 *:px-4 *:py-2 *:text-center xl:-top-[1px]">
+              <td rowSpan={2}>Skrining Riwayat Kesehatan</td>
+              <td colSpan={6} className="!border-r-0">
+                Jenis Resiko Penyakit
+              </td>
+            </tr>
+            <tr
+              className={cn(
+                //   "sticky top-[37px]",
+                "z-20 border-y font-semibold border-t-slate-50 bg-slate-100",
+                "*:border-slate-50 *:px-2 *:py-0.5 *:text-center"
+              )}
+            >
+              <td className="border-x">Diabetes Mellitus</td>
+              <td className="border-r">Hipertensi</td>
+              <td className="border-r">Stroke</td>
+              <td className="border-r">Penyakit Jantung</td>
+              <td className="border-r">Gagal Ginjal</td>
+              <td>Osteoarthritis</td>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            <tr
+              className={cn(
+                "bg-white hover:text-sky-600 align-top *:whitespace-pre-wrap *:align-middle *:px-2 *:py-1.5 *:border-b *:border-gray-200 *:text-center"
+              )}
+            >
+              <td>
+                <p className="text-left">Riwayat Kesehatan</p>
+              </td>
+              <td>
+                <p>{KesehatanScoreFunc("DM")}</p>
+              </td>
+              <td>
+                <p>{KesehatanScoreFunc("HT")}</p>
+              </td>
+              <td>
+                <p>{KesehatanScoreFunc("S")}</p>
+              </td>
+              <td>
+                <p>{KesehatanScoreFunc("J")}</p>
+              </td>
+              <td>
+                <p>{KesehatanScoreFunc("G")}</p>
+              </td>
+              <td>
+                <p>{KesehatanScoreFunc("OA")}</p>
+              </td>
+            </tr>
+            <tr
+              className={cn(
+                "bg-white hover:text-sky-600 align-top *:whitespace-pre-wrap *:align-middle *:px-2 *:py-1.5 *:border-b *:border-gray-200 *:text-center"
+              )}
+            >
+              <td>
+                <p className="text-left">Riwayat Penyakit Pribadi</p>
+              </td>
+              <td>
+                <p>{PenyakitScoreFunc("DM")}</p>
+              </td>
+              <td>
+                <p>{PenyakitScoreFunc("HT")}</p>
+              </td>
+              <td>
+                <p>{PenyakitScoreFunc("S")}</p>
+              </td>
+              <td>
+                <p>{PenyakitScoreFunc("J")}</p>
+              </td>
+              <td>
+                <p>{PenyakitScoreFunc("G")}</p>
+              </td>
+              <td>
+                <p>{PenyakitScoreFunc("OA")}</p>
+              </td>
+            </tr>
+            <tr
+              className={cn(
+                "bg-white hover:text-sky-600 align-top *:whitespace-pre-wrap *:align-middle *:px-2 *:py-1.5 *:border-b *:border-gray-200 *:text-center"
+              )}
+            >
+              <td>
+                <p className="text-left">Riwayat Penyakit Keluarga</p>
+              </td>
+              <td>
+                <p>{KeluargaScoreFunc("DM")}</p>
+              </td>
+              <td>
+                <p>{KeluargaScoreFunc("HT")}</p>
+              </td>
+              <td>
+                <p>{KeluargaScoreFunc("S")}</p>
+              </td>
+              <td>
+                <p>{KeluargaScoreFunc("J")}</p>
+              </td>
+              <td>
+                <p>{KeluargaScoreFunc("G")}</p>
+              </td>
+              <td>
+                <p>{KeluargaScoreFunc("OA")}</p>
+              </td>
+            </tr>
+            <tr
+              className={cn(
+                "bg-white hover:text-sky-600 align-top *:whitespace-pre-wrap *:align-middle *:px-2 *:py-1.5 *:border-b *:border-gray-200 *:text-center"
+              )}
+            >
+              <td>
+                <p className="text-left">Pola Konsumsi Makan</p>
+              </td>
+              <td>
+                <p>{PolaScoreFunc("DM")}</p>
+              </td>
+              <td>
+                <p>{PolaScoreFunc("HT")}</p>
+              </td>
+              <td>
+                <p>{PolaScoreFunc("S")}</p>
+              </td>
+              <td>
+                <p>{PolaScoreFunc("J")}</p>
+              </td>
+              <td>
+                <p>{PolaScoreFunc("G")}</p>
+              </td>
+              <td>
+                <p>{PolaScoreFunc("OA")}</p>
+              </td>
+            </tr>
+            <tr className={cn("bg-white hover:text-sky-600 align-top")}>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "font-semibold"
+                )}
+              >
+                <p>Jumlah</p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>{dm - PlusIMT}</p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>{ht - PlusIMT}</p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>{s - PlusIMT}</p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>{j - PlusIMT}</p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>{g - PlusIMT}</p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>{oa - PlusIMT}</p>
+              </td>
+            </tr>
+            <tr className={cn("bg-white hover:text-sky-600 align-top")}>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "font-semibold"
+                )}
+              >
+                <p>Total tambahan skor</p>
+              </td>
+
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>{dm}</p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>{ht}</p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>{s}</p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>{j}</p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>{g}</p>
+              </td>
+              <td
+                className={cn(
+                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
+                  "text-center"
+                )}
+              >
+                <p>{oa}</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div> */}
       <div className="gap-1 hidden sm:flex">
         <Tab.Group
           selectedIndex={desaIdx}
@@ -517,7 +798,9 @@ export default function Template({ user }: { user: string | undefined }) {
           <Input
             className="px-2 py-1 text-xs"
             id="nama"
-            {...register("pasien.nama")}
+            {...register("pasien.nama", {
+              onChange: (e) => setValue("pasien.nama_kk", e.target.value),
+            })}
           />
         </div>
         <div
