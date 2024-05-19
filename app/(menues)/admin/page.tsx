@@ -197,6 +197,7 @@ export default function Admin() {
                           <input
                             type="checkbox"
                             className="size-4 my-auto accent-slate-700"
+                            checked={false}
                             disabled
                           />
                         </div>
