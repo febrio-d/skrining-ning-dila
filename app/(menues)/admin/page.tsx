@@ -2,21 +2,40 @@
 
 import { Button } from "@/components/button";
 import EdukasiPenyakit from "@/components/edukasi-penyakit";
+import { Pagination } from "@/components/pagination";
+import Search from "@/components/search";
 import { MyOption, MyOptions, SelectInput } from "@/components/select";
+import ViewPasien, { ViewAction, ViewState } from "@/components/view-pasien";
 import { desa } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Dialog, Transition } from "@headlessui/react";
 import type { fisik, pasien, skor } from "@prisma/client";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useReducer, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { TbEditCircle, TbTrash } from "react-icons/tb";
 
 export default function Admin() {
   const { push } = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const page = parseInt(searchParams.get("page") || "1");
+  const desaParam = searchParams.get("desa");
+  const queryParam = searchParams.get("query");
+
   const [semuaDesa] = useState<MyOption>({ label: "Semua Desa", value: 99 });
   const [desaOptions, setDesaOptions] = useState<MyOptions>([semuaDesa]);
   const [selDesa, setSelDesa] = useState<MyOption | null>(semuaDesa);
+
+  const setDesa = (newDesa: number) => {
+    const params = new URLSearchParams(searchParams);
+    if (newDesa === 99) {
+      params.delete("desa");
+    } else {
+      params.set("desa", newDesa.toString());
+    }
+    push(`${pathname}?${params.toString()}`);
+  };
   useEffect(() => {
     setDesaOptions((p) => [
       ...p.slice(0, 1),
@@ -24,29 +43,50 @@ export default function Admin() {
     ]);
   }, [desa]);
 
+  const [total, setTotal] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [mutate, setMutate] = useState<boolean>(false);
   const [data, setData] = useState<
     (pasien & { fisik: fisik | null; skor: skor | null })[]
   >([]);
   const loadData = async () => {
+    setMutate(true);
+    const desaUrlParam = !!desaParam ? `&desa=${desaParam}` : "";
+    const queryUrlParam = !!queryParam ? `&query=${queryParam}` : "";
     try {
-      const resp = await fetch(`api/skrining`, {
-        method: "GET",
-      });
+      const resp = await fetch(
+        `api/skrining?page=${page + desaUrlParam + queryUrlParam}`,
+        {
+          method: "GET",
+        }
+      );
       const json = await resp.json();
       if (json.error) throw new Error(json.message);
       setData(json.data);
+      setTotal(parseInt(json.total));
+      setTotalPages(parseInt(json.pages));
     } catch (err) {
       toast.error("Pasien kosong", { position: "top-right" });
+      setTotal(0);
+    } finally {
+      setMutate(false);
     }
   };
 
-  const initialized = useRef<boolean>(false);
   useEffect(() => {
-    if (!initialized.current) {
-      loadData();
-      initialized.current = true;
-    }
-  }, []);
+    loadData();
+  }, [page, desaParam, queryParam]);
+
+  const viewState = {
+    modal: false,
+    data: undefined,
+  };
+  const viewActs = (state: ViewState, action: ViewAction) => {
+    return {
+      ...action,
+    };
+  };
+  const [view, viewDispatch] = useReducer(viewActs, viewState);
 
   type HapusState = {
     modal: boolean;
@@ -55,6 +95,7 @@ export default function Admin() {
   type HapusAction = HapusState;
   const hapusState = {
     modal: false,
+    desa: undefined,
     data: undefined,
   };
   const hapusActs = (state: HapusState, action: HapusAction) => {
@@ -88,23 +129,31 @@ export default function Admin() {
       <div className="flex min-h-full justify-center p-4 text-center">
         <div className="flex w-full flex-col gap-3">
           <div className="flex justify-between">
-            <SelectInput
-              placeholder="Desa"
-              options={desaOptions}
-              value={selDesa}
-              onChange={(option) => setSelDesa(option as MyOption)}
-              size="sm"
-              className="w-40 text-left"
-            />
+            <div className="flex gap-2">
+              <SelectInput
+                placeholder="Desa"
+                options={desaOptions}
+                value={selDesa}
+                onChange={(option) => {
+                  setSelDesa(option as MyOption);
+                  setDesa((option as MyOption).value as number);
+                }}
+                size="sm"
+                className="w-28 sm:w-40 text-left"
+              />
+              <div className="basis-32 sm:basis-40">
+                <Search />
+              </div>
+            </div>
             <div className="flex gap-2">
               <Button
-                className="px-2 py-0.5 text-xs"
+                className="px-2 py-0 h-7 text-xs"
                 color="green"
                 onClick={() => push("/")}
               >
                 Tambah
               </Button>
-              <EdukasiPenyakit />
+              <EdukasiPenyakit className="h-7 py-1" />
             </div>
           </div>
           <div
@@ -128,16 +177,74 @@ export default function Admin() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {data
-                  .filter((val) =>
-                    selDesa?.value !== 99 ? val.desa === selDesa?.value : val
-                  )
-                  .map((val, idx) => {
+                {mutate ? (
+                  [...Array(25)].map((_, idx) => (
+                    <tr className="bg-white animate-pulse" key={idx}>
+                      <td className="whitespace-pre-wrap px-4 py-2">
+                        <p className="mx-auto h-5 w-6 rounded bg-slate-200"></p>
+                      </td>
+                      <td className="whitespace-pre-wrap px-4 py-2">
+                        <p className="mx-auto h-5 w-36 rounded bg-slate-200"></p>
+                      </td>
+                      <td className="whitespace-pre-wrap px-4 py-2">
+                        <p className="mx-auto h-5 w-16 rounded bg-slate-200"></p>
+                      </td>
+                      <td className="whitespace-pre-wrap px-4 py-2">
+                        <p className="mx-auto h-5 w-16 rounded bg-slate-200"></p>
+                      </td>
+                      <td className="whitespace-pre-wrap px-4 py-2">
+                        <div className="flex items-center justify-center h-full">
+                          <input
+                            type="checkbox"
+                            className="size-4 my-auto accent-slate-700"
+                            disabled
+                          />
+                        </div>
+                      </td>
+                      <td className="whitespace-pre-wrap px-4 py-2">
+                        <p className="mx-auto h-5 w-4 rounded bg-slate-200"></p>
+                      </td>
+                      <td className="whitespace-pre-wrap px-4 py-2">
+                        <p className="mx-auto h-5 w-4 rounded bg-slate-200"></p>
+                      </td>
+                      <td className="whitespace-pre-wrap px-4 py-2">
+                        <p className="mx-auto h-5 w-4 rounded bg-slate-200"></p>
+                      </td>
+                      <td className="whitespace-pre-wrap px-4 py-2">
+                        <p className="mx-auto h-5 w-4 rounded bg-slate-200"></p>
+                      </td>
+                      <td className="whitespace-pre-wrap px-4 py-2">
+                        <p className="mx-auto h-5 w-4 rounded bg-slate-200"></p>
+                      </td>
+                      <td className="whitespace-pre-wrap px-4 py-2">
+                        <p className="mx-auto h-5 w-4 rounded bg-slate-200"></p>
+                      </td>
+                      <td className="whitespace-pre-wrap px-4 py-2">
+                        <div className="flex gap-2 items-center justify-center">
+                          <TbEditCircle
+                            size="1.2rem"
+                            className="text-slate-200"
+                          />
+                          <TbTrash size="1.2rem" className="text-slate-200" />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : total === 0 ? (
+                  <tr>
+                    <td colSpan={12} className="h-14">
+                      Data tidak ditemukan
+                    </td>
+                  </tr>
+                ) : (
+                  data.map((val, idx) => {
+                    const numberPage = page <= 1 ? 0 : (page - 1) * 25;
+                    const nomor = idx + 1 + numberPage;
                     const namaDesa = desa.find((_, idx) => idx === val.desa);
                     return (
                       <tr className="bg-white hover:text-sky-600" key={idx}>
                         <td className="whitespace-pre-wrap px-4 py-2">
-                          {idx + 1 + "."}
+                          {nomor + "."}
                         </td>
                         <td className="whitespace-pre-wrap px-4 py-2">
                           {val.nik}
@@ -178,12 +285,13 @@ export default function Admin() {
                         </td>
                         <td className="whitespace-pre-wrap px-4 py-2">
                           <div className="flex gap-2 items-center justify-center">
-                            {/* <button
+                            <button
                               type="button"
                               className="focus:outline-none"
                               onClick={() =>
-                                hapusDispatch({
+                                viewDispatch({
                                   modal: true,
+                                  desa: namaDesa,
                                   data: val,
                                 })
                               }
@@ -192,7 +300,7 @@ export default function Admin() {
                                 size="1.2rem"
                                 className="text-sky-500 hover:text-sky-600 active:text-sky-700"
                               />
-                            </button> */}
+                            </button>
                             <button
                               type="button"
                               className="focus:outline-none"
@@ -212,12 +320,19 @@ export default function Admin() {
                         </td>
                       </tr>
                     );
-                  })}
+                  })
+                )}
               </tbody>
             </table>
           </div>
+          <div className="flex justify-center">
+            <Pagination page={page} totalPages={totalPages} total={total} />
+          </div>
         </div>
       </div>
+
+      <ViewPasien view={view} viewDispatch={viewDispatch} loadData={loadData} />
+
       <Transition show={hapus.modal} as={React.Fragment}>
         <Dialog
           as="div"

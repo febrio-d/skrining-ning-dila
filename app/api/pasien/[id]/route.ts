@@ -22,7 +22,7 @@ export async function GET(
       });
     return NextResponse.json({
       error: true,
-      message: "NIK telah terdaftar",
+      message: "NIK telah terdaftar!",
     });
   } catch (err) {
     const error = err as Error;

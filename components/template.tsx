@@ -14,45 +14,17 @@ import { toast } from "react-hot-toast";
 import { z } from "zod";
 import { Button } from "./button";
 import EdukasiPenyakit from "./edukasi-penyakit";
+import { Schema, SchemaT } from "@/lib/schema";
+import {
+  KatPenyakit,
+  skriningPolaMakan,
+  skriningRiwKeluarga,
+  skriningRiwKesehatan,
+  skriningRiwPenyakit,
+} from "@/lib/skrining";
 
 export default function Template({ user }: { user: string | undefined }) {
   const { push } = useRouter();
-
-  const Schema = z.object({
-    pasien: z.object({
-      nik: z.string().min(1, "harus diisi"),
-      nama: z.string().min(1, "harus diisi"),
-      nama_kk: z.string().min(1, "harus diisi"),
-      jk: z.string({ required_error: "harus dipilih" }),
-      lahir: z.string().min(1, "harus diisi"),
-      hp: z.string().min(1, "harus diisi"),
-      td: z
-        .number({
-          required_error: "harus diisi",
-          invalid_type_error: "harus diisi",
-        })
-        .array()
-        .length(2),
-      gd: z.number({
-        required_error: "harus diisi",
-        invalid_type_error: "harus diisi",
-      }),
-      tb: z.number({
-        required_error: "harus diisi",
-        invalid_type_error: "harus diisi",
-      }),
-      bb: z.number({
-        required_error: "harus diisi",
-        invalid_type_error: "harus diisi",
-      }),
-    }),
-    kesehatan: z.number().array(),
-    penyakit: z.number().array(),
-    penyakit_keluarga: z.number().array(),
-    pola_makan: z.number().array(),
-  });
-
-  type SchemaT = z.infer<typeof Schema>;
 
   const {
     register,
@@ -108,176 +80,6 @@ export default function Template({ user }: { user: string | undefined }) {
 
   const [desaIdx, setDesaIdx] = useState<number>(0);
 
-  type KatPenyakit = "DM" | "HT" | "S" | "J" | "G" | "OA";
-  const [skriningRiwKesehatan] = useState<
-    { pertanyaan: string; jawaban: string[]; kategori?: KatPenyakit[] }[]
-  >([
-    {
-      pertanyaan:
-        "Apakah anda merasa haus pada saat melakukan aktifitas normal?",
-      jawaban: [
-        "Ya, sering dan selalu haus",
-        "Tidak, saya merasa haus secara normal saja",
-      ],
-      kategori: ["DM"],
-    },
-    {
-      pertanyaan:
-        "Apakah anda sering terbangun disaat tidur malam akibat buang air kecil berkali-kali?",
-      jawaban: ["Ya, lebih dari 3 kali", "Tidak"],
-      kategori: ["DM"],
-    },
-    {
-      pertanyaan:
-        "Apakah anda selalu merasa lapar walaupun sudah makan besar (nasi, lauk pauk dsb) beberapa saat sebelumnya?",
-      jawaban: [
-        "Ya, saya selalu merasa lapar meskipun sudah makan banyak dan berkali-kali (makan lebih dari 5 kali)",
-        "Tidak, saya makan 2-3 kali sehari dengan porsi normal",
-      ],
-      kategori: ["DM"],
-    },
-    {
-      pertanyaan:
-        "Apakah anda mempunyai kebiasaan makan-makanan yang berasa asin?",
-      jawaban: [
-        "Ya, hampir setiap hari saya mengkonsumsi makanan yang berasa asin",
-        "Tidak",
-      ],
-      kategori: ["HT"],
-    },
-    {
-      pertanyaan: "Apakah anda mengkonsumsi kopi?",
-      jawaban: [
-        "Ya, saya hampir selalu mengkonsumsi kopi setiap hari lebih dari 3 gelas sehari",
-        "Tidak, saya tidak pernah mengkonsumsi",
-      ],
-      kategori: ["HT"],
-    },
-    {
-      pertanyaan: "Apakah anda suka merokok?",
-      jawaban: [
-        "Ya, saya merokok hamper setiap hari lebih dari 1 bungkus",
-        "Tidak",
-      ],
-      kategori: ["HT", "S", "J"],
-    },
-    {
-      pertanyaan:
-        "Apakah pekerjaan anda menuntut anda untuk bekerja keras, sehingga anda merasakan sering mudah lelah, susah tidur dan cepat terbangun di pagi hari?",
-      jawaban: [
-        "Ya, saya merasa suasana di tempat kerja saya sangat tinggi, sehingga saya merasa tidak nyaman di tempat kerja. Ketika di rumah saya merasa susah tidur dan saya tidak bisa tidur nyeyak, saya sering terbangun dini hari                ",
-        "Tidak, tempat kerja kami terasa nyaman, meski penuh persaingan namun tidak menegangkan. Kami cukup tidur dan nyenyak",
-      ],
-      kategori: ["S", "J"],
-    },
-    {
-      pertanyaan: "Apakah punya kebiasaan olahraga rutin dan teratur?",
-      jawaban: [
-        "Ya, saya rutin olahraga sedikitnya 2 kali seminggu",
-        "Tidak, saya jarang berolahraga",
-      ],
-      kategori: ["S", "J"],
-    },
-    {
-      pertanyaan:
-        "Apakah anda pernah memperoleh hasil pemeriksaan kolesterol tinggi?",
-      jawaban: [
-        "Ya, hasil kolesterol saya dinyatakan tinggi",
-        "Tidak, hasil kolesterol saya normal",
-      ],
-      kategori: ["S", "J"],
-    },
-    {
-      pertanyaan: "Apakah anda punya kebiasaan kurang minum air putih?",
-      jawaban: [
-        "Ya, saya minum hanya bila haus",
-        "Tidak, saya minum minimal 2 liter per hari",
-      ],
-      kategori: ["G"],
-    },
-    {
-      pertanyaan:
-        "Apakah anda punya kebiasaan minum-minuman kemasan atau soda?",
-      jawaban: ["Ya", "Tidak"],
-      kategori: ["G"],
-    },
-    {
-      pertanyaan:
-        "Apakah anda sering mengkonsumsi jamu-jamuan atau membeli obat terutama anti nyeri di apotek tanpa resep dokter?",
-      jawaban: ["Ya", "Tidak"],
-      kategori: ["G"],
-    },
-    {
-      pertanyaan:
-        "Apakah anda merasakan nyeri sendi saat posisi lutut ditekuk?",
-      jawaban: ["Ya", "Tidak"],
-      kategori: ["OA"],
-    },
-    {
-      pertanyaan:
-        "Apakah kaki anda terasa kaku-kaku pada saat bangun tidur di pagi hari?",
-      jawaban: ["Ya", "Tidak"],
-      kategori: ["OA"],
-    },
-    {
-      pertanyaan: "Apakah saat bekerja anda sering mengangkat beban berat?",
-      jawaban: ["Ya", "Tidak"],
-      kategori: ["OA"],
-    },
-  ]);
-
-  const [skriningRiwPenyakit] = useState<
-    { pertanyaan: string; kategori?: KatPenyakit[] }[]
-  >([
-    { pertanyaan: "Diabetes Mellitus (kencing manis)", kategori: ["DM"] },
-    { pertanyaan: "Stroke", kategori: ["S"] },
-    { pertanyaan: "Penyakit pada retina/mata", kategori: ["DM"] },
-    { pertanyaan: "Hipertensi/tekanan darah tinggi", kategori: ["HT"] },
-    { pertanyaan: "Penyakit jantung koroner", kategori: ["J"] },
-    { pertanyaan: "Kolesterol tinggi", kategori: ["S", "J"] },
-    { pertanyaan: "Penyakit ginjal", kategori: ["G"] },
-    { pertanyaan: "Asam urat tinggi", kategori: ["G"] },
-    { pertanyaan: "Pengapuran pada sendi lutut", kategori: ["OA"] },
-  ]);
-
-  const [skriningRiwKeluarga] = useState<
-    { pertanyaan: string; kategori?: KatPenyakit[] }[]
-  >([
-    { pertanyaan: "Hipertensi/tekanan darah tinggi", kategori: ["HT"] },
-    { pertanyaan: "Diabetes Mellitus/kencing manis", kategori: ["DM"] },
-    { pertanyaan: "Penyakit jantung koroner", kategori: ["J"] },
-    { pertanyaan: "Penyakit ginjal", kategori: ["G"] },
-    { pertanyaan: "Stroke", kategori: ["S"] },
-    { pertanyaan: "Pengapuran sendi", kategori: ["OA"] },
-  ]);
-
-  const [skriningPolaMakan] = useState<
-    { pertanyaan: string; kategori?: KatPenyakit[] }[]
-  >([
-    { pertanyaan: "Masakan bersantan", kategori: ["HT", "J", "S"] },
-    {
-      pertanyaan: "Masakan berminyak dan berlemak",
-      kategori: ["HT", "J", "S"],
-    },
-    {
-      pertanyaan:
-        "Makanan cepat saji (Kentucky/ayam goreng tepung, French fries/kentang goreng dll)",
-      kategori: ["HT", "J", "S"],
-    },
-    { pertanyaan: "Jerohan, otak, dll", kategori: ["HT", "J", "S"] },
-    {
-      pertanyaan: "Sup buntut, sup daging, sup jerohan, dll",
-      kategori: ["HT", "J", "S"],
-    },
-    {
-      pertanyaan:
-        "Minuman bersoda (larutan, adem sari, coca-cola, fanta, sprite dll)",
-      kategori: ["G"],
-    },
-    { pertanyaan: "Teh manis > 3 gelas/hari", kategori: ["DM"] },
-    { pertanyaan: "Kopi > 3 gelas/hari", kategori: ["HT"] },
-  ]);
-
   // useEffect(() => {
   //   const subscription = watch((value, { name, type }) => {
   //     if (name?.includes("penyakit")) {
@@ -305,7 +107,6 @@ export default function Template({ user }: { user: string | undefined }) {
   const initialized = useRef<boolean>(false);
   useEffect(() => {
     if (!initialized.current) {
-      // loadData();
       setValue(
         "kesehatan",
         Array.from({ length: skriningRiwKesehatan.length }, () => 0)
@@ -472,263 +273,6 @@ export default function Template({ user }: { user: string | undefined }) {
       })}
       className="flex w-full transform flex-col gap-3 overflow-visible p-6 text-left align-middle transition-all"
     >
-      {/* <div
-        className={cn(
-          "h-fit w-fit z-20 flex-1 bg-white overflow-hidden rounded shadow sticky top-0 left-0"
-        )}
-      >
-        <table className="min-w-full text-sm">
-          <thead>
-            <tr className="font-semibold bg-slate-100 *:border-r *:border-r-slate-50 *:px-4 *:py-2 *:text-center xl:-top-[1px]">
-              <td rowSpan={2}>Skrining Riwayat Kesehatan</td>
-              <td colSpan={6} className="!border-r-0">
-                Jenis Resiko Penyakit
-              </td>
-            </tr>
-            <tr
-              className={cn(
-                //   "sticky top-[37px]",
-                "z-20 border-y font-semibold border-t-slate-50 bg-slate-100",
-                "*:border-slate-50 *:px-2 *:py-0.5 *:text-center"
-              )}
-            >
-              <td className="border-x">Diabetes Mellitus</td>
-              <td className="border-r">Hipertensi</td>
-              <td className="border-r">Stroke</td>
-              <td className="border-r">Penyakit Jantung</td>
-              <td className="border-r">Gagal Ginjal</td>
-              <td>Osteoarthritis</td>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            <tr
-              className={cn(
-                "bg-white hover:text-sky-600 align-top *:whitespace-pre-wrap *:align-middle *:px-2 *:py-1.5 *:border-b *:border-gray-200 *:text-center"
-              )}
-            >
-              <td>
-                <p className="text-left">Riwayat Kesehatan</p>
-              </td>
-              <td>
-                <p>{KesehatanScoreFunc("DM")}</p>
-              </td>
-              <td>
-                <p>{KesehatanScoreFunc("HT")}</p>
-              </td>
-              <td>
-                <p>{KesehatanScoreFunc("S")}</p>
-              </td>
-              <td>
-                <p>{KesehatanScoreFunc("J")}</p>
-              </td>
-              <td>
-                <p>{KesehatanScoreFunc("G")}</p>
-              </td>
-              <td>
-                <p>{KesehatanScoreFunc("OA")}</p>
-              </td>
-            </tr>
-            <tr
-              className={cn(
-                "bg-white hover:text-sky-600 align-top *:whitespace-pre-wrap *:align-middle *:px-2 *:py-1.5 *:border-b *:border-gray-200 *:text-center"
-              )}
-            >
-              <td>
-                <p className="text-left">Riwayat Penyakit Pribadi</p>
-              </td>
-              <td>
-                <p>{PenyakitScoreFunc("DM")}</p>
-              </td>
-              <td>
-                <p>{PenyakitScoreFunc("HT")}</p>
-              </td>
-              <td>
-                <p>{PenyakitScoreFunc("S")}</p>
-              </td>
-              <td>
-                <p>{PenyakitScoreFunc("J")}</p>
-              </td>
-              <td>
-                <p>{PenyakitScoreFunc("G")}</p>
-              </td>
-              <td>
-                <p>{PenyakitScoreFunc("OA")}</p>
-              </td>
-            </tr>
-            <tr
-              className={cn(
-                "bg-white hover:text-sky-600 align-top *:whitespace-pre-wrap *:align-middle *:px-2 *:py-1.5 *:border-b *:border-gray-200 *:text-center"
-              )}
-            >
-              <td>
-                <p className="text-left">Riwayat Penyakit Keluarga</p>
-              </td>
-              <td>
-                <p>{KeluargaScoreFunc("DM")}</p>
-              </td>
-              <td>
-                <p>{KeluargaScoreFunc("HT")}</p>
-              </td>
-              <td>
-                <p>{KeluargaScoreFunc("S")}</p>
-              </td>
-              <td>
-                <p>{KeluargaScoreFunc("J")}</p>
-              </td>
-              <td>
-                <p>{KeluargaScoreFunc("G")}</p>
-              </td>
-              <td>
-                <p>{KeluargaScoreFunc("OA")}</p>
-              </td>
-            </tr>
-            <tr
-              className={cn(
-                "bg-white hover:text-sky-600 align-top *:whitespace-pre-wrap *:align-middle *:px-2 *:py-1.5 *:border-b *:border-gray-200 *:text-center"
-              )}
-            >
-              <td>
-                <p className="text-left">Pola Konsumsi Makan</p>
-              </td>
-              <td>
-                <p>{PolaScoreFunc("DM")}</p>
-              </td>
-              <td>
-                <p>{PolaScoreFunc("HT")}</p>
-              </td>
-              <td>
-                <p>{PolaScoreFunc("S")}</p>
-              </td>
-              <td>
-                <p>{PolaScoreFunc("J")}</p>
-              </td>
-              <td>
-                <p>{PolaScoreFunc("G")}</p>
-              </td>
-              <td>
-                <p>{PolaScoreFunc("OA")}</p>
-              </td>
-            </tr>
-            <tr className={cn("bg-white hover:text-sky-600 align-top")}>
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
-                  "font-semibold"
-                )}
-              >
-                <p>Jumlah</p>
-              </td>
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
-                  "text-center"
-                )}
-              >
-                <p>{dm - PlusIMT}</p>
-              </td>
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
-                  "text-center"
-                )}
-              >
-                <p>{ht - PlusIMT}</p>
-              </td>
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
-                  "text-center"
-                )}
-              >
-                <p>{s - PlusIMT}</p>
-              </td>
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
-                  "text-center"
-                )}
-              >
-                <p>{j - PlusIMT}</p>
-              </td>
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
-                  "text-center"
-                )}
-              >
-                <p>{g - PlusIMT}</p>
-              </td>
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
-                  "text-center"
-                )}
-              >
-                <p>{oa - PlusIMT}</p>
-              </td>
-            </tr>
-            <tr className={cn("bg-white hover:text-sky-600 align-top")}>
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
-                  "font-semibold"
-                )}
-              >
-                <p>Total tambahan skor</p>
-              </td>
-
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
-                  "text-center"
-                )}
-              >
-                <p>{dm}</p>
-              </td>
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
-                  "text-center"
-                )}
-              >
-                <p>{ht}</p>
-              </td>
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
-                  "text-center"
-                )}
-              >
-                <p>{s}</p>
-              </td>
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
-                  "text-center"
-                )}
-              >
-                <p>{j}</p>
-              </td>
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
-                  "text-center"
-                )}
-              >
-                <p>{g}</p>
-              </td>
-              <td
-                className={cn(
-                  "whitespace-pre-wrap align-middle px-2 py-1.5 border-b border-gray-200",
-                  "text-center"
-                )}
-              >
-                <p>{oa}</p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div> */}
       <div className="gap-1 hidden sm:flex">
         <Tab.Group
           selectedIndex={desaIdx}
@@ -798,9 +342,7 @@ export default function Template({ user }: { user: string | undefined }) {
           <Input
             className="px-2 py-1 text-xs"
             id="nama"
-            {...register("pasien.nama", {
-              onChange: (e) => setValue("pasien.nama_kk", e.target.value),
-            })}
+            {...register("pasien.nama")}
           />
         </div>
         <div
@@ -1160,7 +702,7 @@ export default function Template({ user }: { user: string | undefined }) {
                                 htmlFor={`kesehatan-${idx}-${jwbId + 1}`}
                                 className={cn(
                                   "relative cursor-pointer select-none",
-                                  "bg-white px-2 py-1 text-gray-500",
+                                  "px-2 py-1 text-gray-500",
                                   "peer-checked:border-sky-600 peer-checked:text-sky-700",
                                   "peer-disabled:cursor-not-allowed peer-disabled:bg-gray-100 peer-disabled:hover:border-gray-300",
                                   "flex h-fit w-full justify-between items-center gap-2 rounded-lg text-slate-700"
@@ -1227,7 +769,7 @@ export default function Template({ user }: { user: string | undefined }) {
                                 htmlFor={`penyakit-${idx}-${jwbId + 1}`}
                                 className={cn(
                                   "relative cursor-pointer select-none",
-                                  "bg-white px-2 py-1 text-gray-500",
+                                  "px-2 py-1 text-gray-500",
                                   "peer-checked:border-sky-600 peer-checked:text-sky-700",
                                   "peer-disabled:cursor-not-allowed peer-disabled:bg-gray-100 peer-disabled:hover:border-gray-300",
                                   "flex h-fit w-full justify-between items-center gap-2 rounded-lg text-slate-700"
@@ -1288,7 +830,7 @@ export default function Template({ user }: { user: string | undefined }) {
                                 }`}
                                 className={cn(
                                   "relative cursor-pointer select-none",
-                                  "bg-white px-2 py-1 text-gray-500",
+                                  "px-2 py-1 text-gray-500",
                                   "peer-checked:border-sky-600 peer-checked:text-sky-700",
                                   "peer-disabled:cursor-not-allowed peer-disabled:bg-gray-100 peer-disabled:hover:border-gray-300",
                                   "flex h-fit w-full justify-between items-center gap-2 rounded-lg text-slate-700"
@@ -1347,7 +889,7 @@ export default function Template({ user }: { user: string | undefined }) {
                                 htmlFor={`pola_makan-${idx}-${jwbId + 1}`}
                                 className={cn(
                                   "relative cursor-pointer select-none",
-                                  "bg-white px-2 py-1 text-gray-500",
+                                  "px-2 py-1 text-gray-500",
                                   "peer-checked:border-sky-600 peer-checked:text-sky-700",
                                   "peer-disabled:cursor-not-allowed peer-disabled:bg-gray-100 peer-disabled:hover:border-gray-300",
                                   "flex h-fit w-full justify-between items-center gap-2 rounded-lg text-slate-700"

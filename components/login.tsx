@@ -12,7 +12,7 @@ import type { users } from "@prisma/client";
 import { useRouter } from "next/navigation";
 
 export default function Login() {
-  const { push } = useRouter();
+  const { push, refresh } = useRouter();
 
   const [data, setData] = React.useState<{
     username: string;
@@ -82,6 +82,7 @@ export default function Login() {
                 setLoading(false);
                 if (!json?.error) {
                   toast.success(json?.message);
+                  refresh();
                   push("/");
                 } else {
                   throw new Error(json?.message);

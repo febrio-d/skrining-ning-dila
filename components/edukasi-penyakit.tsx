@@ -6,7 +6,7 @@ import { Menu, Transition } from "@headlessui/react";
 import React from "react";
 import { RiArrowDropDownLine } from "react-icons/ri";
 
-export default function EdukasiPenyakit() {
+export default function EdukasiPenyakit({ className }: { className?: string }) {
   return (
     <Menu as={React.Fragment}>
       <div className="relative">
@@ -14,7 +14,8 @@ export default function EdukasiPenyakit() {
           className={cn(
             "inline-flex text-center text-sm focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50",
             "rounded-md bg-gray-900/20 font-semibold text-gray-700 active:bg-slate-300",
-            "p-2"
+            "p-2",
+            className
           )}
         >
           <RiArrowDropDownLine className="h-5 w-5" />

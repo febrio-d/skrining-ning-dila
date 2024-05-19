@@ -43,6 +43,6 @@ export async function POST(request: Request) {
       error: true,
       message: error.message,
     };
-    return NextResponse.json(resp);
+    return NextResponse.json(resp, { status: 400 });
   }
 }
